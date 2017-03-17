@@ -11,6 +11,10 @@ version: "3"
 services:
 
   compute:
-    build: ./compute
+    build: ./_base
+    container_name: compute
     ports:
       - "5000:8080"
+    volumes:
+      - ./compute:/go/src/compute
+    working_dir: /go/src/compute
