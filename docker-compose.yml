@@ -1,0 +1,16 @@
+# Each image will run as a service in a container
+#
+# This file defines all the services we want to use along with details about how and where those services will run
+#
+# This file will be used by Docker Compose (version 3)
+# 
+
+
+version: "3"
+
+services:
+
+  compute:
+    build: ./compute
+    ports:
+      - "5000:8080"
