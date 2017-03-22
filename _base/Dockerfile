@@ -1,6 +1,6 @@
 ########### DEV ###########
 
-FROM golang:1.8
+FROM golang:1.8-alpine
 
 # Install the bee dev tool
 RUN go get github.com/beego/bee
