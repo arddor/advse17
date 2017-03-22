@@ -16,5 +16,5 @@ services:
     ports:
       - "5000:8080"
     volumes:
-      - ./compute:/go/src/ase_compute
+      - ./ase_compute:/go/src/ase_compute
     working_dir: /go/src/ase_compute
