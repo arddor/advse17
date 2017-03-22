@@ -2,8 +2,9 @@ package main
 
 import (
 	"net/http"
-
 	"github.com/gin-gonic/gin"
+	"gopkg.in/mgo.v2"
+	"gopkg.in/mgo.v2/bson"
 )
 
 func main() {
@@ -11,7 +12,7 @@ func main() {
 
 	r.GET("/", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
-			"message": "HELLO WORLD, with reload in docker-compose!",
+			"message": "Hello from the compute container",
 		})
 	})
 

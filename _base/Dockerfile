@@ -7,7 +7,12 @@ RUN go get github.com/beego/bee
 
 # Install dependencies
 # from ALL containers
+
+# https://github.com/gin-gonic/gin
 RUN go get github.com/gin-gonic/gin
+
+# https://labix.org/mgo
+RUN go get gopkg.in/mgo.v2
 
 # Expose the application on port 8080
 EXPOSE 8080
