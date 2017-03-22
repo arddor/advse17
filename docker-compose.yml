@@ -10,7 +10,7 @@ version: "3"
 
 services:
 
-  compute:
+  ase_compute:
     build: ./_base
     container_name: ase_compute
     ports:
