@@ -10,15 +10,6 @@ version: "3"
 
 services:
 
-  ase_timeseries:
-    image: mongo:3.4
-    container_name: ase_timeseries
-    ports:
-      - "27017:27017"
-    volumes:
-      - ./ase_timeseries/mongodb:/data/db
-
-
   ase_compute:
     build: ./_base
     container_name: ase_compute
@@ -30,3 +21,12 @@ services:
     links:
       # connect using host="ase_timeseries"
       - ase_timeseries
+
+
+  ase_timeseries:
+    image: mongo:3.4
+    container_name: ase_timeseries
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./ase_timeseries/mongodb:/data/db
