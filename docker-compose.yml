@@ -12,9 +12,9 @@ services:
 
   compute:
     build: ./_base
-    container_name: compute
+    container_name: ase_compute
     ports:
       - "5000:8080"
     volumes:
-      - ./compute:/go/src/compute
-    working_dir: /go/src/compute
+      - ./compute:/go/src/ase_compute
+    working_dir: /go/src/ase_compute
