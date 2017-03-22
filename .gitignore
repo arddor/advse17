@@ -22,4 +22,7 @@ _testmain.go
 *.exe
 *.test
 *.prof
+
+# Containers
 ase_*/ase_*
+ase_timeseries/mongodb/*
