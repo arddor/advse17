@@ -3,8 +3,8 @@ package main
 import (
 	"net/http"
 	"github.com/gin-gonic/gin"
-	"gopkg.in/mgo.v2"
-	"gopkg.in/mgo.v2/bson"
+	// "gopkg.in/mgo.v2"
+	// "gopkg.in/mgo.v2/bson"
 )
 
 func main() {
