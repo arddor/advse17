@@ -39,4 +39,4 @@ services:
       - "5001:8080"
     volumes:
       - ./ase_twitter:/go/src/ase_twitter
-    working_dir: /go/src/ase_compute
+    working_dir: /go/src/ase_twitter
