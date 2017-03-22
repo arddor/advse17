@@ -16,6 +16,9 @@ RUN go get github.com/gin-gonic/gin
 # https://labix.org/mgo
 RUN go get gopkg.in/mgo.v2
 
+# https://github.com/ChimeraCoder/anaconda
+RUN go get github.com/ChimeraCoder/anaconda
+
 # Expose the application on port 8080
 EXPOSE 8080
 

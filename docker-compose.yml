@@ -30,3 +30,13 @@ services:
       - "27017:27017"
     volumes:
       - ./ase_timeseries/mongodb:/data/db
+
+
+  ase_twitter:
+    build: ./_base
+    container_name: ase_twitter
+    ports:
+      - "5001:8080"
+    volumes:
+      - ./ase_twitter:/go/src/ase_twitter
+    working_dir: /go/src/ase_compute
