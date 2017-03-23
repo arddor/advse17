@@ -1,6 +1,8 @@
 ########### DEV ###########
 
-FROM golang:1.8-alpine
+#FROM golang:1.8-alpine
+# beego needs the normal version
+FROM golang:1.8
 
 # Install the bee dev tool
 RUN go get github.com/beego/bee
@@ -13,6 +15,9 @@ RUN go get github.com/gin-gonic/gin
 
 # https://labix.org/mgo
 RUN go get gopkg.in/mgo.v2
+
+# https://github.com/ChimeraCoder/anaconda
+RUN go get github.com/ChimeraCoder/anaconda
 
 # Expose the application on port 8080
 EXPOSE 8080

@@ -23,7 +23,9 @@ _testmain.go
 *.exe
 *.test
 *.prof
+
+# Containers
 ase_*/ase_*
-ase_*/debug
-ase_compute/.vscode/launch.json
+
 ase_compute/debug
+ase_timeseries/mongodb/*
