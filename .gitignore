@@ -6,6 +6,7 @@
 # Folders
 _obj
 _test
+.vscode
 
 # Architecture specific extensions/prefixes
 *.[568vq]
@@ -23,3 +24,6 @@ _testmain.go
 *.test
 *.prof
 ase_*/ase_*
+ase_*/debug
+ase_compute/.vscode/launch.json
+ase_compute/debug
