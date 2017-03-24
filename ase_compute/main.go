@@ -30,13 +30,15 @@ func main() {
 	var err error
 
 	// sentiment analysis
+	fmt.Println("starting sentiment analysis")
 	model, err = sentiment.Restore()
 	if err != nil {
 		panic(fmt.Sprintf("Could not restore model!\n\t%v\n", err))
 	}
 
 	// mongo
-	session, err := mgo.Dial("mongodb://127.0.0.1:27017")
+	fmt.Println("connecting to mongodb")
+	session, err := mgo.Dial("mongodb://127.0.0.1:27017") // local
 	if err != nil {
 		panic(err)
 	}
@@ -53,6 +55,7 @@ func main() {
 	// fmt.Println("Text:", result.Text)
 
 	// gin
+	fmt.Println("starting gin")
 	r := gin.Default()
 
 	r.GET("/", func(c *gin.Context) {
@@ -76,7 +79,7 @@ func main() {
 			})
 		}
 	})
-
+	fmt.Println("running ...")
 	r.Run()
 
 }
