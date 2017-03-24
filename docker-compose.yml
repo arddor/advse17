@@ -10,6 +10,16 @@ version: "3"
 
 services:
 
+  ase_api:
+    build: ./_base
+    container_name: ase_api
+    ports:
+      - "5002:8080"
+    volumes:
+      - ./ase_api:/go/src/ase_api
+    working_dir: /go/src/ase_api
+
+
   ase_compute:
     build: ./_base
     container_name: ase_compute
@@ -28,8 +38,8 @@ services:
     container_name: ase_timeseries
     ports:
       - "27017:27017"
-    volumes:
-      - ./ase_timeseries/mongodb:/data/db
+    # volumes:
+    #   - ./ase_timeseries/mongodb:/data/db
 
 
   ase_twitter:
