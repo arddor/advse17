@@ -36,7 +36,7 @@ func main() {
 	}
 
 	// mongo
-	session, err := mgo.Dial("mongodb://127.0.0.1:27017")
+	session, err := mgo.Dial("mongodb://ase_timeseries:27017")
 	if err != nil {
 		panic(err)
 	}
