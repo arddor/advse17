@@ -38,7 +38,9 @@ func main() {
 
 	// mongo
 	fmt.Println("connecting to mongodb")
-	session, err := mgo.Dial("mongodb://127.0.0.1:27017") // local
+	//session, err := mgo.Dial("mongodb://127.0.0.1:27017") // local
+	session, err := mgo.Dial("mongodb://ase_timeseries:27017") // docker
+
 	if err != nil {
 		panic(err)
 	}

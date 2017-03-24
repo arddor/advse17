@@ -29,7 +29,7 @@ services:
       - ./ase_compute:/go/src/ase_compute
     working_dir: /go/src/ase_compute
     links:
-      # connect using host="ase_timeseries"
+      # connect using mongodb://ase_timeseries:27017
       - ase_timeseries
 
 
