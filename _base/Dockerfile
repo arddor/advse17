@@ -13,6 +13,9 @@ RUN go get github.com/beego/bee
 # https://github.com/gin-gonic/gin
 RUN go get github.com/gin-gonic/gin
 
+# https://github.com/cdipaolo/sentiment
+RUN go get github.com/cdipaolo/sentiment
+
 # https://labix.org/mgo
 RUN go get gopkg.in/mgo.v2
 
