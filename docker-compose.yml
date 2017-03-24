@@ -38,8 +38,8 @@ services:
     container_name: ase_timeseries
     ports:
       - "27017:27017"
-    volumes:
-      - ./ase_timeseries/mongodb:/data/db
+    # volumes:
+    #   - ./ase_timeseries/mongodb:/data/db
 
 
   ase_twitter:
