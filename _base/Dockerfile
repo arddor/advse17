@@ -19,8 +19,8 @@ RUN go get github.com/cdipaolo/sentiment
 # https://labix.org/mgo
 RUN go get gopkg.in/mgo.v2
 
-# https://github.com/ChimeraCoder/anaconda
-RUN go get github.com/ChimeraCoder/anaconda
+# https://github.com/dghubble/go-twitter
+RUN go get github.com/dghubble/go-twitter/twitter
 
 # Expose the application on port 8080
 EXPOSE 8080

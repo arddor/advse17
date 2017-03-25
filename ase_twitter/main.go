@@ -3,7 +3,7 @@ package main
 import (
 	"net/http"
 	"github.com/gin-gonic/gin"
-	// "github.com/ChimeraCoder/anaconda"
+	// "github.com/dghubble/go-twitter/twitter"
 )
 
 // So we need to first authenticate ourselfs: https://github.com/ChimeraCoder/anaconda#authentication
