@@ -7,7 +7,10 @@ import (
 	"github.com/cdipaolo/sentiment"
 	"github.com/gin-gonic/gin"
 
+	"net/url"
+
 	"gopkg.in/mgo.v2"
+	"gopkg.in/mgo.v2/bson"
 )
 
 var (
@@ -15,14 +18,28 @@ var (
 )
 
 func sentimentCdipaolo(sentence string) uint8 {
-	// fmt.Println("cdipaolo: ", model.SentimentAnalysis(sentence, sentiment.English).Score)
+	fmt.Println("Sentiment for '"+sentence+"':", model.SentimentAnalysis(sentence, sentiment.English).Score)
 	return model.SentimentAnalysis(sentence, sentiment.English).Score
 }
 
-// Tweet Text and sentiment value of a tweet
-type Tweet struct {
-	Text      string
-	Sentiment uint8
+// AseSentimentData sentiment data including timestamp
+type AseSentimentData struct {
+	sentiment uint8
+	timestamp string
+}
+
+// AseTerm term with associated data
+type AseTerm struct {
+	_id  bson.ObjectId
+	term string
+	data []AseSentimentData
+}
+
+func aseGetPostFormArray(c *gin.Context) url.Values {
+	req := c.Request
+	req.ParseForm()
+	req.ParseMultipartForm(32 << 20) // 32 MB
+	return req.PostForm
 }
 
 func main() {
@@ -30,34 +47,26 @@ func main() {
 	var err error
 
 	// sentiment analysis
-	fmt.Println("starting sentiment analysis")
+	fmt.Println("Starting sentiment analysis")
 	model, err = sentiment.Restore()
 	if err != nil {
 		panic(fmt.Sprintf("Could not restore model!\n\t%v\n", err))
 	}
 
 	// mongo
-	fmt.Println("connecting to mongodb")
-	//session, err := mgo.Dial("mongodb://127.0.0.1:27017") // local
-	session, err := mgo.Dial("mongodb://ase_timeseries:27017") // docker
+	fmt.Println("Connecting to mongodb")
+	session, err := mgo.Dial("mongodb://127.0.0.1:27017") // local
+	// session, err := mgo.Dial("mongodb://ase_timeseries:27017") // docker
 
 	if err != nil {
 		panic(err)
 	}
 	defer session.Close()
 
-	collection := session.DB("test").C("tweets")
-
-	// result := Tweet{}
-	// err = collection.Find(bson.M{"sentiment": 1}).One(&result)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-
-	// fmt.Println("Text:", result.Text)
+	collection := session.DB("test").C("terms")
 
 	// gin
-	fmt.Println("starting gin")
+	fmt.Println("Starting gin")
 	r := gin.Default()
 
 	r.GET("/", func(c *gin.Context) {
@@ -67,21 +76,47 @@ func main() {
 	})
 
 	r.POST("/insert", func(c *gin.Context) {
+		// URL like this: http://localhost:5000/insert?term=Novartis
+		// Header like this: Content-Type: application/x-www-form-urlencoded
+		// Body like this: Content-Type: timestamp1=I+like+cake
+		term := c.Query("term")
+		tweets := aseGetPostFormArray(c)
 
-		message := c.Query("message")
-		sentimentValue := sentimentCdipaolo(message)
-		err = collection.Insert(&Tweet{message, sentimentValue})
-		if err != nil {
-			c.JSON(http.StatusConflict, gin.H{
-				"message": "Insert failed: " + message,
-			})
-		} else {
-			c.JSON(http.StatusOK, gin.H{
-				"message": "Insert successful: " + message,
-			})
+		if tweets != nil && len(tweets) > 0 { // at least 1 tweet should be passed (arrays are supported)
+
+			var sentimentData []AseSentimentData
+			for key, value := range tweets {
+				sentimentData = append(sentimentData, AseSentimentData{sentimentCdipaolo(value[0]), key})
+			}
+
+			termExists := AseTerm{}
+			err = collection.Find(bson.M{"term": term}).Limit(1).One(&termExists) // figure out if term exists in database
+			fmt.Println("Error after searching for term: ", err)
+			if err.Error() == "not found" { // term not yet in db
+				err = collection.Insert(&AseTerm{bson.NewObjectId(), term, sentimentData})
+				if err == nil {
+					fmt.Println("Insert successful")
+				}
+			} else if err == nil { // else append to data
+				pushToArray := bson.M{"$push": bson.M{"data": sentimentData}}
+				err = collection.Update(termExists._id, pushToArray)
+				if err == nil {
+					fmt.Println("Update on " + termExists._id + " successful")
+				}
+			}
+			// show errors
+			if err != nil {
+				c.JSON(http.StatusConflict, gin.H{
+					"message": "Storing sentiments for " + term + " failed",
+				})
+			} else {
+				c.JSON(http.StatusOK, gin.H{
+					"message": "Storing sentiments for " + term + " successful!",
+				})
+			}
 		}
 	})
-	fmt.Println("running ...")
+	fmt.Println("Running ...")
 	r.Run()
 
 }
