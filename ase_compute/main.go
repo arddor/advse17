@@ -24,15 +24,15 @@ func sentimentCdipaolo(sentence string) uint8 {
 
 // AseSentimentData sentiment data including timestamp
 type AseSentimentData struct {
-	sentiment uint8
-	timestamp string
+	Sentiment uint8
+	Timestamp string
 }
 
 // AseTerm term with associated data
 type AseTerm struct {
-	_id  bson.ObjectId
-	term string
-	data []AseSentimentData
+	ID   bson.ObjectId `json:"id" bson:"_id,omitempty"`
+	Term string
+	Data []AseSentimentData
 }
 
 func aseGetPostFormArray(c *gin.Context) url.Values {
@@ -55,8 +55,8 @@ func main() {
 
 	// mongo
 	fmt.Println("Connecting to mongodb")
-	session, err := mgo.Dial("mongodb://127.0.0.1:27017") // local
-	// session, err := mgo.Dial("mongodb://ase_timeseries:27017") // docker
+	// session, err := mgo.Dial("mongodb://127.0.0.1:27017") // local
+	session, err := mgo.Dial("mongodb://ase_timeseries:27017") // docker
 
 	if err != nil {
 		panic(err)
@@ -92,18 +92,22 @@ func main() {
 			termExists := AseTerm{}
 			err = collection.Find(bson.M{"term": term}).Limit(1).One(&termExists) // figure out if term exists in database
 			fmt.Println("Error after searching for term: ", err)
-			if err.Error() == "not found" { // term not yet in db
+
+			if err == nil { // found a match, append to data
+				sentimentData = append(termExists.Data, sentimentData...)
+				pushToArray := bson.M{"$set": bson.M{"data": sentimentData}}
+				fmt.Println(termExists.ID, pushToArray)
+				err = collection.Update(bson.M{"_id": termExists.ID}, pushToArray)
+				if err == nil {
+					fmt.Println("Update on " + termExists.ID + " successful")
+				}
+			} else if err.Error() == "not found" { // term not yet in db
 				err = collection.Insert(&AseTerm{bson.NewObjectId(), term, sentimentData})
 				if err == nil {
 					fmt.Println("Insert successful")
 				}
-			} else if err == nil { // else append to data
-				pushToArray := bson.M{"$push": bson.M{"data": sentimentData}}
-				err = collection.Update(termExists._id, pushToArray)
-				if err == nil {
-					fmt.Println("Update on " + termExists._id + " successful")
-				}
 			}
+
 			// show errors
 			if err != nil {
 				c.JSON(http.StatusConflict, gin.H{
@@ -114,6 +118,8 @@ func main() {
 					"message": "Storing sentiments for " + term + " successful!",
 				})
 			}
+		} else {
+			fmt.Println("no tweet received")
 		}
 	})
 	fmt.Println("Running ...")
