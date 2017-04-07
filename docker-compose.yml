@@ -33,6 +33,13 @@ services:
       - ase_timeseries
 
 
+  ase_queue:
+    image: redis:3.2.8
+    container_name: ase_queue
+    ports:
+      - "6379:6379"
+  
+  
   ase_timeseries:
     image: mongo:3.4
     container_name: ase_timeseries
