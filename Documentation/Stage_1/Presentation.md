@@ -175,32 +175,40 @@
 
 ---
 
-# Technology Zoo - Rational
+# Technology Zoo - Platform
 
-Cloud Platform: [Google Container Engine](https://cloud.google.com/container-engine/) (GCE)
-	* Easy support of [Kubernetes](https://kubernetes.io)
+* Cloud Platform: [Google Container Engine](https://cloud.google.com/container-engine/) (GCE)
+ 	* Easy support of [Kubernetes](https://kubernetes.io)
 
-Containerization: [Docker](http://docker.com)
+* Containerization: [Docker](http://docker.com)
 	* Popular Container engine
 
-Container orchestration: [Kubernetes](https://kubernetes.io)
+* Container orchestration: [Kubernetes](https://kubernetes.io)
 	* Popular Container orchestration
 
-Programming Language: Google Go
+---
+
+# Technology Zoo - Backend
+
+* Programming Language: Google Go
 	* New Programming language 🎉
 	* Uniquely suited for Web development
 	* Have I mentioned it's fast?
 
-Terms Storage: [MongoDB](https://www.mongodb.com)
+* Terms Storage: [MongoDB](https://www.mongodb.com)
 	* Easy data schema
 
-Queue Storage: [Redis](https://redis.io)
+* Queue Storage: [Redis](https://redis.io)
 	* High-performant in-memory storage ideally suited for our purpose
 
-Frontend: [ViewerJS](http://viewerjs.org)
+---
+
+# Technology Zoo - Frontend
+
+* Frontend: [ViewerJS](http://viewerjs.org)
 	* Similar to Angular
 
-Webserver: [nginx](http://nginx.org)
+* Webserver: [nginx](http://nginx.org)
 	* Battle-proven Webserver
 
 ---
