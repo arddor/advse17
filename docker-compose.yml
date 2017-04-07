@@ -34,7 +34,7 @@ services:
 
 
   ase_queue:
-    image: redis:3.2.8
+    image: redis:3.2.8-alpine
     container_name: ase_queue
     ports:
       - "6379:6379"
