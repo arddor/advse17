@@ -18,6 +18,11 @@ services:
     volumes:
       - ./ase_api:/go/src/ase_api
     working_dir: /go/src/ase_api
+    links:
+      # register new terms
+      - ase_timeseries
+      # load generation
+      - ase_queue
 
 
   ase_compute:
@@ -29,8 +34,10 @@ services:
       - ./ase_compute:/go/src/ase_compute
     working_dir: /go/src/ase_compute
     links:
-      # connect using mongodb://ase_timeseries:27017
+      # fetch terms and update sentiment
       - ase_timeseries
+      # fetch tweets to process
+      - ase_queue
 
 
   ase_queue:
@@ -38,8 +45,8 @@ services:
     container_name: ase_queue
     ports:
       - "6379:6379"
-  
-  
+
+
   ase_timeseries:
     image: mongo:3.4
     container_name: ase_timeseries
@@ -57,3 +64,8 @@ services:
     volumes:
       - ./ase_twitter:/go/src/ase_twitter
     working_dir: /go/src/ase_twitter
+    links:
+      # fetch terms
+      - ase_timeseries
+      # add tweets
+      - ase_queue
