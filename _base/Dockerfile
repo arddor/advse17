@@ -19,8 +19,11 @@ RUN go get github.com/cdipaolo/sentiment
 # https://labix.org/mgo
 RUN go get gopkg.in/mgo.v2
 
-# https://github.com/dghubble/go-twitter
+# https://github.com/dghubble/go-twitter/twitter
 RUN go get github.com/dghubble/go-twitter/twitter
+
+# https://github.com/dghubble/oauth1
+RUN go get github.com/dghubble/oauth1
 
 # Expose the application on port 8080
 EXPOSE 8080
