@@ -1,0 +1,115 @@
+# Architecture
+
+General Architecture: Microservices running in Containers
+
+
+# Components
+
+[](./Architecture_Diagram.png)
+
+# Frontend and API
+
+User inputs term, clicks on register.
+
+Request sent to Rest API. API stores Term in MongoDB (Persistent Value). Ideally MongoDB notifies the TwitterService that a Term has been added.
+
+# Twitter Service
+
+Twitter service adds newly added Term to the Terms to be tracked.
+
+New Tweets arrive over streaming API. Tweets get stored into a Redis DB acting as a Queue.
+
+# Workers
+
+Workers get scaled up based on length of the Queue through Kubernetes.
+Running Workers process the Queue:
+* Get data
+* Assign Tweet to Term
+* Calculate Sentiment
+
+Calculted Sentiment get stored back into MongoDB. Once queue drops down, Workers get scaled back.
+
+# Data Schema
+
+Seniments get stored into an Array attached to the Term on the DB
+
+# Results display
+
+Rest API gets request, calls MongoDB to collect relevant data. Browser renders data. Socket gets openend for continues pushes.
+
+
+# Load Generation
+
+Rest API Endpoint to directly fill the Queue.
+
+
+# Rational
+
+Every component is potentially scalable through Kubernetes (even MongoDB).
+
+* Fault Tolerance:
+	* Container recovery through Kubernetes
+	* Decoupled design and Microservice
+
+* Elasticity
+	* Container scaling through Kubernetes
+
+* Industry proven design: Rest API
+
+* Hardware independance through Container
+
+
+# Concernes
+
+Lots of lock-ins
+
+Twitter (Streaming API limits: 400 Terms)
+	* may not recognize terms perfectly
+
+Replacing Kubernetes or Docker is a pain BUT:
+
+But it's easy to: Switch programming languages thus libraries.
+
+
+
+# Technology Zoo - Rational
+
+Cloud Platform: Google Container Engine (GCE)
+	* Easy support of Kubernetes
+
+Containerization: Docker
+	* Popular Container engine
+
+Container orchestration: Kubernetes
+	* Popular Container orchestration
+
+Programming Language: Google Go
+	* New Programming language (yay!)
+	* Uniquely suited for Web developement
+	* Have I mentioned it's fast?
+
+Terms Storage: MongoDB
+	* Easy data schema
+
+Queue Storage: Redis
+	* High-performant in-memory storage ideally suited for our purpose
+
+Frontend: ViewJS
+	* Marc has experience in ViewJS - similar to Angular
+
+Webserver: nginx
+	* Popular Webserver
+
+
+# Dev Environment
+
+Docker containers using Docker Compose
+
+(Demo)
+
+
+
+
+# Open Questions
+
+How to display the Sentiments.
