@@ -14,7 +14,7 @@
 
 # Containerized Microservices deployed through Kubernetes
 
-![left](img/dummy-image.jpg)
+![left, fit](img/architecture.png)
 
 * Components embedded in (Docker) Containers
 * Containers have (ideally) one single responsibility
@@ -24,9 +24,9 @@
 
 ---
 
-# Frontent and API
+# Frontend and API
 
-![left](img/dummy-image.jpg)
+![left, fit](img/architecture_frontend.png)
 
 * User inputs term
 * Click on register
@@ -39,7 +39,7 @@
 
 # Timeseries: MongoDB (I)
 
-![left](img/dummy-image.jpg)
+![left, fit](img/architecture_mongodb.png)
 
 * Request Handler stores Term in MongoDB
 * Persistency guaranteed by GCE [Persistence Disk](https://cloud.google.com/compute/docs/disks/)
@@ -50,7 +50,7 @@
 
 # Twitter Service
 
-![left](img/dummy-image.jpg)
+![left, fit](img/architecture_twitter.png)
 
 * Gets notified of newly created Terms
 * Streaming stops and restarts with the new Term added for [tracking](https://dev.twitter.com/streaming/overview/request-parameters#track)
@@ -64,7 +64,7 @@
 
 # Worker Queue
 
-![left](img/dummy-image.jpg)
+![left, fit](img/architecture_queue.png)
 
 * [Redis](https://redis.io): in-memory data structure store
 * A FIFO queue of Strings (Tweets)
@@ -75,7 +75,7 @@
 
 # Compute Workers
 
-![left](img/dummy-image.jpg)
+![left, fit](img/architecture_queue.png)
 
 * Running Workers process the Queue:
 	* Assign Tweet to Term (filtering)
@@ -90,7 +90,7 @@
 
 # Timeseries: MongoDB (II)
 
-![left](img/dummy-image.jpg)
+![left, fit](img/architecture_mongodb.png)
 
 * Workers store the calculated Sentiment into MongoDB.
 
@@ -101,7 +101,7 @@
 
 # Displaying Results
 
-![left](img/dummy-image.jpg)
+![left, fit](img/architecture_frontend.png)
 
 * Rest API gets request
 * Collect relevant data from MongoDB
