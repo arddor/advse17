@@ -4,7 +4,7 @@
 
 ---
 
-![inline](img/dummy-image.jpg)
+![inline](img/architecture.png)
 
 
 ^ High-level Overview: Client-Server
@@ -114,11 +114,10 @@
 
 * Client / Server through Rest API
 * Event-Driven notification of Term updates
-* Pipes and Filters
 * Blackboard: Redis Queue
 	* Factory: Twitter Service
 	* Worker: Compute Workers
-* Highly decoupled
+* Highly decoupled Microservices
 
 ^ TODO: this feels like it needs more work
 
@@ -128,6 +127,12 @@
 
 ---
 
+# Initial Idea
+
+* Docker Swarm
+* Digital Ocean
+
+---
 
 ![left](img/kubernetes-logo.png)
 
@@ -136,14 +141,6 @@
 
 
 ![right](img/docker-logo.png)
-
----
-
-# [Kubernetes](https://kubernetes.io) in one slide
-
-@marc chasch ächt du das no mache?
-
-^ Containers embedded in Pods
 
 ---
 
@@ -161,15 +158,14 @@
 
 ---
 
-# Concernes
+# Concerns
 
 * High lock-in to Kubernetes
-* Twitter
-	* Only 400 Term, thus no scaling
-	* May not match to terms perfectly
+* [Twitter](https://dev.twitter.com/streaming/reference/post/statuses/filter): 400 keyword tracking per stream
+	* "default access level allows up to 400 track keywords"
+* Matching: may not match to terms perfectly
 * Redis: may become a bottleneck
 	* but we highly doubt it
-* 
 
 ^ TODO: this feels like it needs more work
 
@@ -205,8 +201,8 @@
 
 # Technology Zoo - Frontend
 
-* Frontend: [ViewerJS](http://viewerjs.org)
-	* Similar to Angular
+* Frontend: [Vuejs](http://vuejs.org)
+	* Similar to Angular and React
 
 * Webserver: [nginx](http://nginx.org)
 	* Battle-proven Webserver
