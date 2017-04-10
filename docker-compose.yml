@@ -52,7 +52,7 @@ services:
     container_name: ase_timeseries
     ports:
       - "27017:27017"
-    # volumes:
+    # volumes: # make sure this exists locally
     #   - ./ase_timeseries/mongodb:/data/db
 
 
