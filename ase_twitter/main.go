@@ -15,17 +15,9 @@ import (
 	"github.com/dghubble/go-twitter/twitter"
 )
 
-// Needs endpoint to register terms
-// terms need to be stored into mongo and set to active (a simple flag will do)
-// the currently tracked terms need to be updated to contain the newly added term
-// (I think this requires to restart the stream)
 
 // Incoming tweets need to be directly stored into the queue
 // https://github.com/streadway/amqp
-
-// Needs endpoint to DE-register term
-// term needs to be deactivated (a simple flag will do)
-// restart stream using new term
 
 // upon startup needs to go get the currently stored terms
 
