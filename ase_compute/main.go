@@ -27,6 +27,10 @@ import (
 // Each container requires a session to the db anyway
 // on startup query the the terms and start polling every 10 seconds
 
+// TODO: instead of polling the DB Marc will investigate the DB hooks
+// (as discussed on 2017-04-10)
+// ideally each compute node will get notified from the DB with new terms
+
 
 var (
 	model sentiment.Models
