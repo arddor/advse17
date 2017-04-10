@@ -129,8 +129,8 @@
 
 # Initial Idea
 
-* Docker Swarm
 * Digital Ocean
+* Docker Swarm
 
 ---
 
