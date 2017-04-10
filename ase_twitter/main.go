@@ -15,19 +15,18 @@ import (
 	"github.com/dghubble/go-twitter/twitter"
 )
 
-// So we need to first authenticate ourselfs: https://github.com/ChimeraCoder/anaconda#authentication
-// 
-// We then need to open a public stream https://dev.twitter.com/streaming/public
-// 
-// and use the POST endpoint https://dev.twitter.com/streaming/reference/post/statuses/filter
-// 
-// then pass our terms we'd like to observe with the "track" parameter https://dev.twitter.com/streaming/reference/post/statuses/filter
-// 
-// Ideally we would want ONE STREAM PER TERM we are tracking, that would make our life a lot easier.
-// 
-// Under that assumption this code here would just have to provide someway to receive a term and then start tracking it
-// (aka authorize with twitter and start the stream)
-// The received tweets should be processed and we should have an array of Strings with the content of the strings.
+// Needs endpoint to register terms
+// terms need to be stored into mongo and set to active (a simple flag will do)
+// the currently tracked terms need to be updated to contain the newly added term
+// (I think this requires to restart the stream)
+
+// Incoming tweets need to be directly stored into the redis queue
+
+// Needs endpoint to DE-register term
+// term needs to be deactivated (a simple flag will do)
+// restart stream using new term
+
+// upon startup needs to go get the currently stored terms
 
 var (
 trackingParams []string

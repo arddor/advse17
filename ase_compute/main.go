@@ -13,6 +13,21 @@ import (
 	"gopkg.in/mgo.v2/bson"
 )
 
+// Needs to process the queue
+// upon startup needs to go into "polling" mode: continuously poll the redis queue
+// if the queue doesn't return a value, wait for a sensible amount (1 second?)
+
+// if new tweet gets polled, process it - this means
+// first: match the tweet to a term: basically rebuild twitters matching (https://dev.twitter.com/streaming/overview/request-parameters#track)
+// 			throw away the tweet if no match exists
+// second: generate the sentiment
+// finally: store the sentiment to the term in the mongo db
+
+// Regarding the terms from mongo:
+// Each container requires a session to the db anyway
+// on startup query the the terms and start polling every 10 seconds
+
+
 var (
 	model sentiment.Models
 )
