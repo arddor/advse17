@@ -1,0 +1,20 @@
+{
+  "_id": ObjectId("58ea4de87a3b130043bbe2ec"),
+  "term": "test",
+  "data": [{
+    "sentiment": 0,
+    "timestamp": "Sun Apr 09 15:13:31 +0000 2017"
+  }, {
+    "sentiment": 1,
+    "timestamp": "Sun Apr 09 15:13:30 +0000 2017"
+  }, {
+    "sentiment": 0,
+    "timestamp": "Sun Apr 09 15:13:31 +0000 2017"
+  }, {
+    "sentiment": 0,
+    "timestamp": "Sun Apr 09 15:13:31 +0000 2017"
+  }, {
+    "sentiment": 1,
+    "timestamp": "Sun Apr 09 15:13:31 +0000 2017"
+  }]
+}
