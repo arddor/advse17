@@ -41,7 +41,7 @@ services:
 
 
   ase_queue:
-    image: rabbitmq:3.6.9-alpine
+    image: redis:3.2.8-alpine
     container_name: ase_queue
     ports:
       - "6379:6379"
