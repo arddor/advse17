@@ -14,7 +14,7 @@ import (
 )
 
 // Needs to process the queue
-// upon startup needs to go into "polling" mode: continuously poll the redis queue
+// upon startup needs to go into "polling" mode: continuously poll the queue (https://github.com/streadway/amqp)
 // if the queue doesn't return a value, wait for a sensible amount (1 second?)
 
 // if new tweet gets polled, process it - this means

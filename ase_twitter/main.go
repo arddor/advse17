@@ -20,7 +20,8 @@ import (
 // the currently tracked terms need to be updated to contain the newly added term
 // (I think this requires to restart the stream)
 
-// Incoming tweets need to be directly stored into the redis queue
+// Incoming tweets need to be directly stored into the queue
+// https://github.com/streadway/amqp
 
 // Needs endpoint to DE-register term
 // term needs to be deactivated (a simple flag will do)
