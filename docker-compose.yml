@@ -41,10 +41,11 @@ services:
 
 
   ase_queue:
+    # https://hub.docker.com/_/rabbitmq/
     image: rabbitmq:3.6.9-alpine
     container_name: ase_queue
     ports:
-      - "6379:6379"
+      - "5672:5672"
 
 
   ase_timeseries:
