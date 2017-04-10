@@ -49,10 +49,12 @@ services:
 
 
   ase_timeseries:
-    image: mongo:3.4
+    # https://hub.docker.com/_/rethinkdb/
+    image: rethinkdb:2.3.5
     container_name: ase_timeseries
     ports:
-      - "27017:27017"
+      - "28015:28015"
+      #- "5010:8080" # Admin interface
     # volumes: # make sure this exists locally
     #   - ./ase_timeseries/mongodb:/data/db
 

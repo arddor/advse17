@@ -16,8 +16,8 @@ RUN go get github.com/gin-gonic/gin
 # https://github.com/cdipaolo/sentiment
 RUN go get github.com/cdipaolo/sentiment
 
-# https://labix.org/mgo
-RUN go get gopkg.in/mgo.v2
+# https://github.com/GoRethink/gorethink - RethinkDB
+RUN go get github.com/GoRethink/gorethink
 
 # https://github.com/dghubble/go-twitter/twitter
 RUN go get github.com/dghubble/go-twitter/twitter

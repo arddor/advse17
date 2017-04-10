@@ -20,11 +20,8 @@ import (
 // https://github.com/streadway/amqp
 
 // upon startup needs to go get the currently stored terms
-
-// TODO: as discussed on 2017-04-10 most of this show move to the API
-// (keep the load OFF this container since we can't scale it)
-// Marc will investigate regarding the database hooks
-// such that this guy just gets notifed when terms change ("event-driven")
+// https://www.rethinkdb.com/docs/
+// then start listening for term updates
 
 var (
 trackingParams []string
