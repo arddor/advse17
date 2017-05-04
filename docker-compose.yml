@@ -66,6 +66,7 @@ services:
       - "5001:8080"
     volumes:
       - ./ase_twitter:/go/src/ase_twitter
+      - ./ase_api:/go/src/ase_api
     working_dir: /go/src/ase_twitter
     links:
       # fetch terms
