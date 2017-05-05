@@ -1,28 +1,24 @@
+//ase_api
+
 package main
 
 import (
 	"log"
 	"net/http"
 
-	"github.com/gin-gonic/gin"
+	"ase_api/db"
 
-	mgo "gopkg.in/mgo.v2"
+	"github.com/gin-gonic/gin"
+	r "gopkg.in/gorethink/gorethink.v3"
 )
 
 type Server struct {
 	Router *gin.Engine
-	DB     *mgo.Session
+	DB     *r.Session
 }
 
 func (s *Server) Initialize(addr string) {
-	var err error
-
-	s.DB, err = mgo.Dial(addr)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	s.DB.SetMode(mgo.Monotonic, true)
+	s.DB = db.Initialize(addr)
 
 	s.Router = gin.Default()
 	s.initializeRoutes()
@@ -30,7 +26,7 @@ func (s *Server) Initialize(addr string) {
 
 func (s *Server) initializeRoutes() {
 	s.Router.GET("/", s.listTerms)
-	s.Router.POST("/", s.createTerm)
+	// s.Router.POST("/", s.createTerm)
 }
 
 func (s *Server) Run(addr string) {
@@ -38,7 +34,7 @@ func (s *Server) Run(addr string) {
 }
 
 func (s *Server) listTerms(c *gin.Context) {
-	terms, err := getTerms(s.DB)
+	terms, err := db.GetTerms()
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"message": "Error",
@@ -47,6 +43,7 @@ func (s *Server) listTerms(c *gin.Context) {
 	c.JSON(http.StatusOK, terms)
 }
 
+/*
 func (s *Server) createTerm(c *gin.Context) {
 	var term term
 	err := c.Bind(&term)
@@ -62,3 +59,4 @@ func (s *Server) createTerm(c *gin.Context) {
 
 	c.JSON(http.StatusCreated, term)
 }
+*/

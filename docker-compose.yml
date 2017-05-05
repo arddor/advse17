@@ -3,7 +3,7 @@
 # This file defines all the services we want to use along with details about how and where those services will run
 #
 # This file will be used by Docker Compose (version 3)
-# 
+#
 
 
 version: "3"
@@ -14,7 +14,7 @@ services:
     build: ./_base
     container_name: ase_api
     ports:
-      - "5002:8080"
+      - "5002:8000"
     volumes:
       - ./ase_api:/go/src/ase_api
     working_dir: /go/src/ase_api
@@ -41,18 +41,21 @@ services:
 
 
   ase_queue:
-    image: redis:3.2.8-alpine
+    # https://hub.docker.com/_/rabbitmq/
+    image: rabbitmq:3.6.9-alpine
     container_name: ase_queue
     ports:
-      - "6379:6379"
+      - "5672:5672"
 
 
   ase_timeseries:
-    image: mongo:3.4
+    # https://hub.docker.com/_/rethinkdb/
+    image: rethinkdb:2.3.5
     container_name: ase_timeseries
     ports:
-      - "27017:27017"
-    # volumes:
+      - "28015:28015"
+      - "5010:8080" # Admin interface
+    # volumes: # make sure this exists locally
     #   - ./ase_timeseries/mongodb:/data/db
 
 
@@ -63,6 +66,7 @@ services:
       - "5001:8080"
     volumes:
       - ./ase_twitter:/go/src/ase_twitter
+      - ./ase_api:/go/src/ase_api
     working_dir: /go/src/ase_twitter
     links:
       # fetch terms

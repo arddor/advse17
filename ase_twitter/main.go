@@ -1,3 +1,5 @@
+// ase_twitter
+
 package main
 
 import (
@@ -6,28 +8,21 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-	"net/http"
-	"net/url"
 	"time"
+	"ase_api/db"
 	
 	"github.com/dghubble/oauth1"
-	"github.com/gin-gonic/gin"
 	"github.com/dghubble/go-twitter/twitter"
+	"github.com/streadway/amqp"
 )
 
-// So we need to first authenticate ourselfs: https://github.com/ChimeraCoder/anaconda#authentication
-// 
-// We then need to open a public stream https://dev.twitter.com/streaming/public
-// 
-// and use the POST endpoint https://dev.twitter.com/streaming/reference/post/statuses/filter
-// 
-// then pass our terms we'd like to observe with the "track" parameter https://dev.twitter.com/streaming/reference/post/statuses/filter
-// 
-// Ideally we would want ONE STREAM PER TERM we are tracking, that would make our life a lot easier.
-// 
-// Under that assumption this code here would just have to provide someway to receive a term and then start tracking it
-// (aka authorize with twitter and start the stream)
-// The received tweets should be processed and we should have an array of Strings with the content of the strings.
+
+// Incoming tweets need to be directly stored into the queue
+// https://github.com/streadway/amqp
+
+// upon startup needs to go get the currently stored terms
+// https://www.rethinkdb.com/docs/
+// then start listening for term updates
 
 var (
 trackingParams []string
@@ -35,6 +30,13 @@ trackingParams []string
 
 func addTrackingParam(param string) {
 trackingParams = append(trackingParams, param)
+}
+
+func failOnError(err error, msg string) {
+  if err != nil {
+    log.Fatalf("%s: %s", msg, err)
+    panic(fmt.Sprintf("%s: %s", msg, err))
+  }
 }
 
 func main() {
@@ -48,51 +50,74 @@ accessSecret := "MlUhiDtWbYtMa1w3xLERmcATc6WVXYRr69xKGmnpslsWt"
 config := oauth1.NewConfig(consumerKey, consumerSecret)
 token := oauth1.NewToken(accessToken, accessSecret)
 httpClient := config.Client(oauth1.NoContext, token)
+var err error
+// connect to RabbitMQ server
+// TODO: change url
+conn, err := amqp.Dial("amqp://ase_queue:5672")
+failOnError(err, "Failed to connect to RabbitMQ")
+defer conn.Close()
+
+// create a channel
+ch, err := conn.Channel()
+failOnError(err, "Failed to open a channel")
+defer ch.Close()
+
+// declare a queue for us to send to
+q, err := ch.QueueDeclare(
+  "tweet", // name
+  true,   // durable -> queue is not "lost" even when rabbitMQ crashes
+  false,   // delete when unused
+  false,   // exclusive
+  false,   // no-wait
+  nil,     // arguments
+)
+failOnError(err, "Failed to declare a queue")
 
 //TODO: docker dependency
+// use docker-compose depends_on
 time.Sleep(3000 * time.Millisecond)
 
 var stream *twitter.Stream
-var err error
-client := twitter.NewClient(httpClient)
-// gin listening to: intern 8080, extern 5000
-r := gin.Default()
 
-r.PUT("/terms/:term", func(c *gin.Context) {
- 
+client := twitter.NewClient(httpClient)
+
+db.Initialize("ase_timeseries:28015")
+
 // Convenience Demux demultiplexed stream messages
 	demux := twitter.NewSwitchDemux()
 	demux.Tweet = func(tweet *twitter.Tweet) {
-	// TODO: we need to send the actual term to the sentiment analysis
+
 		text := tweet.Text
 		timestamp := tweet.CreatedAt
-		link := "http://ase_compute:8080/insert?term=test"
-		resp, err := http.PostForm(link, url.Values{timestamp: {text}})
-		if err != nil {
+		
+		// publish a message to the queue
+		body := text
+		err = ch.Publish(
+		"",     // exchange
+		q.Name, // routing key
+		false,  // mandatory
+		false,  // immediate
+		amqp.Publishing {
+		DeliveryMode: amqp.Persistent,
+		ContentType: "text/plain",
+		MessageId: timestamp,
+		Body:        []byte(body),
+		})
+		failOnError(err, "Failed to publish a message")
+	}
+
+var terms []db.Term
+terms, error := db.GetTerms();
+
+	if error != nil {
 		log.Fatal(err)
-		}
-		fmt.Println(resp)
-		defer resp.Body.Close()
-	}
-	demux.DM = func(dm *twitter.DirectMessage) {
-		fmt.Println(dm.SenderID)
-	}
-	demux.Event = func(event *twitter.Event) {
-		fmt.Printf("%#v\n", event)
-	}
-
-
-	fmt.Println("Starting Stream...")
-	param := c.Param("term")
-	fmt.Println("Found new param: " + param)
-	// TODO: does this do anything?
-
-	addTrackingParam(param)
-	if len(trackingParams) > 1 {
-		stream.Stop()
 	}
 	
-	params := &twitter.StreamFilterParams{
+for _, term := range terms {
+addTrackingParam(term.Term)
+}
+
+params := &twitter.StreamFilterParams{
 		Track: trackingParams,
 		StallWarnings: twitter.Bool(true),
 		}
@@ -104,14 +129,34 @@ r.PUT("/terms/:term", func(c *gin.Context) {
 	// Receive messages until stopped or stream quits
 	go demux.HandleChan(stream.Messages)
 
+db.OnChange(func(change map[string]*db.Term) {
+var tempTerm *db.Term 
+var oldTerm *db.Term
+tempTerm = change["new_val"]
+oldTerm = change["old_val"]
+if oldTerm != nil && oldTerm != tempTerm {
+	addTrackingParam(tempTerm.Term)
+	stream.Stop()
+	params := &twitter.StreamFilterParams{
+		Track: trackingParams,
+		StallWarnings: twitter.Bool(true),
+		}
+	stream, err = client.Streams.Filter(params)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+	// Receive messages until stopped or stream quits
+	go demux.HandleChan(stream.Messages)
+	}
+})
 
 	// Wait for SIGINT and SIGTERM (HIT CTRL-C)
-	ch := make(chan os.Signal)
-	signal.Notify(ch, syscall.SIGINT, syscall.SIGTERM)
-	log.Println(<-ch)
+	channel := make(chan os.Signal)
+	signal.Notify(channel, syscall.SIGINT, syscall.SIGTERM)
+	log.Println(<-channel)
 
 	fmt.Println("Stopping Stream...")
 	stream.Stop()
-	})
-	r.Run()
+
 }
