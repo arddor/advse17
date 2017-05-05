@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/cdipaolo/sentiment"
 	"github.com/gin-gonic/gin"
@@ -55,8 +56,8 @@ func main() {
 
 	// mongo
 	fmt.Println("Connecting to mongodb")
-	// session, err := mgo.Dial("mongodb://127.0.0.1:27017") // local
-	session, err := mgo.Dial("mongodb://ase_timeseries:27017") // docker
+	session, err := mgo.Dial("mongodb://127.0.0.1:27017") // local
+	// session, err := mgo.Dial("mongodb://ase_timeseries:27017") // docker
 
 	if err != nil {
 		panic(err)
@@ -76,47 +77,36 @@ func main() {
 	})
 
 	r.POST("/insert", func(c *gin.Context) {
-		// URL like this: http://localhost:5000/insert?term=Novartis
+		// URL like this: http://ase_compute:8080/insert or http://localhost:5000/insert from outside docker
 		// Header like this: Content-Type: application/x-www-form-urlencoded
 		// Body like this: Content-Type: timestamp1=I+like+cake
-		term := c.Query("term")
-		tweets := aseGetPostFormArray(c)
+		fmt.Println(c.Query("term"))
+		tweets := aseGetPostFormArray(c) // get tweets from queue later
+
+		// find all terms
+		// ### TODO: Do this only when new term was registered
+		var allTerms []AseTerm
+		err = collection.Find(nil).Select(bson.M{"term": 1}).All(&allTerms)
+		if err != nil {
+			fmt.Println(err)
+		}
+		// ###
 
 		if tweets != nil && len(tweets) > 0 { // at least 1 tweet should be passed (arrays are supported)
 
-			var sentimentData []AseSentimentData
 			for key, value := range tweets {
-				sentimentData = append(sentimentData, AseSentimentData{sentimentCdipaolo(value[0]), key})
-			}
-
-			termExists := AseTerm{}
-			err = collection.Find(bson.M{"term": term}).Limit(1).One(&termExists) // figure out if term exists in database
-			fmt.Println("Error after searching for term: ", err)
-
-			if err == nil { // found a match, append to data
-				sentimentData = append(termExists.Data, sentimentData...)
-				pushToArray := bson.M{"$set": bson.M{"data": sentimentData}}
-				fmt.Println(termExists.ID, pushToArray)
-				err = collection.Update(bson.M{"_id": termExists.ID}, pushToArray)
-				if err == nil {
-					fmt.Println("Update on " + termExists.ID + " successful")
+				for _, term := range allTerms {
+					if strings.Contains(strings.ToLower(value[0]), strings.ToLower(term.Term)) {
+						fmt.Println("'" + value[0] + "' contains " + term.Term)
+						pushToArray := bson.M{"$push": bson.M{"data": AseSentimentData{sentimentCdipaolo(value[0]), key}}}
+						err = collection.Update(bson.M{"_id": term.ID}, pushToArray)
+						if err == nil {
+							fmt.Println("Update on " + term.ID + " successful")
+						} else {
+							fmt.Println("Update on " + term.ID + " NOT successful")
+						}
+					}
 				}
-			} else if err.Error() == "not found" { // term not yet in db
-				err = collection.Insert(&AseTerm{bson.NewObjectId(), term, sentimentData})
-				if err == nil {
-					fmt.Println("Insert successful")
-				}
-			}
-
-			// show errors
-			if err != nil {
-				c.JSON(http.StatusConflict, gin.H{
-					"message": "Storing sentiments for " + term + " failed",
-				})
-			} else {
-				c.JSON(http.StatusOK, gin.H{
-					"message": "Storing sentiments for " + term + " successful!",
-				})
 			}
 		} else {
 			fmt.Println("no tweet received")
