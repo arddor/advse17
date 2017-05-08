@@ -32,10 +32,22 @@ func addTrackingParam(param string) {
 trackingParams = append(trackingParams, param)
 }
 
+func removeTrackingParam(param string) {
+// TODO: check if this works
+k := 0
+for _, n := range trackingParams {
+    if n != param { // filter
+        trackingParams[k] = n
+        k++
+    }
+}
+trackingParams = trackingParams[:k] // set slice len to remaining elements
+}
+
 func failOnError(err error, msg string) {
   if err != nil {
     log.Fatalf("%s: %s", msg, err)
-    panic(fmt.Sprintf("%s: %s", msg, err))
+    fmt.Sprintf("%s: %s", msg, err)
   }
 }
 
@@ -89,7 +101,7 @@ db.Initialize("ase_timeseries:28015")
 
 		text := tweet.Text
 		timestamp := tweet.CreatedAt
-		
+		fmt.Println(text)
 		// publish a message to the queue
 		body := text
 		err = ch.Publish(
@@ -130,24 +142,31 @@ params := &twitter.StreamFilterParams{
 	go demux.HandleChan(stream.Messages)
 
 db.OnChange(func(change map[string]*db.Term) {
-var tempTerm *db.Term 
-var oldTerm *db.Term
-tempTerm = change["new_val"]
-oldTerm = change["old_val"]
-if oldTerm != nil && oldTerm != tempTerm {
-	addTrackingParam(tempTerm.Term)
-	stream.Stop()
-	params := &twitter.StreamFilterParams{
-		Track: trackingParams,
-		StallWarnings: twitter.Bool(true),
+	var tempTerm *db.Term 
+	var oldTerm *db.Term
+	tempTerm = change["new_val"]
+	oldTerm = change["old_val"]
+	if oldTerm != tempTerm {
+	// TODO: check conditions
+	// does this work with if just newTerm != nil? so just else?
+		if (oldTerm == nil && newTerm != nil) || newTerm != nil {
+			addTrackingParam(tempTerm.Term)
 		}
-	stream, err = client.Streams.Filter(params)
+		if newTerm == nil {
+			removeTrackingParam(tempTerm.Term)
+		}
+		stream.Stop()
+		params := &twitter.StreamFilterParams{
+			Track: trackingParams,
+			StallWarnings: twitter.Bool(true),
+		}
+		stream, err = client.Streams.Filter(params)
 
-	if err != nil {
-		log.Fatal(err)
-	}
-	// Receive messages until stopped or stream quits
-	go demux.HandleChan(stream.Messages)
+		if err != nil {
+			log.Fatal(err)
+		}
+		// Receive messages until stopped or stream quits
+		go demux.HandleChan(stream.Messages)
 	}
 })
 
