@@ -13,14 +13,14 @@ var session *r.Session
 
 type Term struct {
 	ID      string      `json:"id" gorethink:"id,omitempty"`
-	Term    string      `json:"term"`
-	Data    []Sentiment `json:"data"`
-	Created time.Time
+	Term    string      `json:"term" gorethink:"term"`
+	Data    []Sentiment `json:"data" gorethink:"data"`
+	Created time.Time   `json:"created" gorethink:"created"`
 }
 
 type Sentiment struct {
-	Timestamp time.Time `json:"time"`
-	Sentiment int       `json:"sentiment"`
+	Timestamp time.Time `json:"time" gorethink:"timestamp"`
+	Sentiment int       `json:"sentiment" gorethink:"sentiment"`
 }
 
 func Initialize(addr string) *r.Session {
@@ -52,12 +52,43 @@ func GetTerms() ([]Term, error) {
 	return terms, nil
 }
 
-func CreateTerm(term string) error {
-	_, err := r.Table("items").Insert(Term{Term: term}).RunWrite(session)
+func GetTerm(id string) (*Term, error) {
+	cursor, err := r.Table("items").Get(id).Run(session)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+
+	var term Term
+	cursor.One(&term)
+	cursor.Close()
+
+	return &term, nil
+}
+
+func CreateTerm(term string) (*Term, error) {
+	obj := Term{
+		Term:    term,
+		Data:    []Sentiment{},
+		Created: time.Now(),
+	}
+
+	res, err := r.Table("items").Insert(obj).RunWrite(session)
+	if err != nil {
+		return nil, err
+	}
+
+	obj.ID = res.GeneratedKeys[0]
+
+	return &obj, nil
+}
+
+// AddSentiment pushes a sentiment into the term with the id
+func AddSentiment(id string, sentiment Sentiment) error {
+	_, err := r.Table("items").Get(id).
+		Update(map[string]interface{}{"data": r.Row.Field("Data").Append(sentiment)}).
+		RunWrite(session)
+
+	return err
 }
 
 func OnChange(fn func(value map[string]*Term)) {
