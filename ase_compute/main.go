@@ -4,16 +4,12 @@ package main
 
 import (
 	"fmt"
-	"net/http"
-	"strings"
 
 	"github.com/cdipaolo/sentiment"
-	"github.com/gin-gonic/gin"
 
-	"net/url"
-
-	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
+
+	"ase_api/db" // I copied this to "C:\Users\B\go\src\ase_api" to work locally -> remove ir later
 )
 
 // Needs to process the queue
@@ -34,15 +30,10 @@ import (
 // https://www.rethinkdb.com/docs/
 // ideally each compute node will get notified from the DB with new terms
 
-
 var (
-	model sentiment.Models
+	_terms             []db.Term
+	_number_of_threads = 10
 )
-
-func sentimentCdipaolo(sentence string) uint8 {
-	fmt.Println("Sentiment for '"+sentence+"':", model.SentimentAnalysis(sentence, sentiment.English).Score)
-	return model.SentimentAnalysis(sentence, sentiment.English).Score
-}
 
 // AseSentimentData sentiment data including timestamp
 type AseSentimentData struct {
@@ -57,83 +48,121 @@ type AseTerm struct {
 	Data []AseSentimentData
 }
 
-func aseGetPostFormArray(c *gin.Context) url.Values {
-	req := c.Request
-	req.ParseForm()
-	req.ParseMultipartForm(32 << 20) // 32 MB
-	return req.PostForm
+func initSentimentAnalysis() sentiment.Models {
+	fmt.Println("Starting sentiment analysis")
+	var model, err = sentiment.Restore()
+	if err != nil {
+		panic(fmt.Sprintf("Could not restore model!\n\t%v\n", err))
+	}
+	return model
+}
+
+func sentimentCdipaolo(sentence string, model sentiment.Models) uint8 {
+	var score = model.SentimentAnalysis(sentence, sentiment.English).Score
+	fmt.Println("Sentiment for '"+sentence+"':", score)
+	return score
+}
+
+func initDB() {
+	var err error
+
+	db.Initialize("ase_timeseries:28015")
+
+	_terms, err = db.GetTerms()
+	if err != nil {
+		panic(fmt.Sprintf("Could not retrieve terms!\n\t%v\n", err))
+	}
+
+	db.OnChange(func(change map[string]*db.Term) {
+		var newTerm *db.Term
+		var oldTerm *db.Term
+		newTerm = change["new_val"]
+		oldTerm = change["old_val"]
+		if oldTerm == nil { // term was added
+			_terms = append(_terms, *newTerm)
+		} else if newTerm == nil { // term was removed
+			for index, t := range _terms {
+				if t.Term == oldTerm.Term {
+					_terms[index] = _terms[len(_terms)-1] // Replace it with the last one.
+					_terms = _terms[:len(_terms)-1]       // Chop off the last one
+					break
+				}
+			}
+		}
+	})
+}
+
+// func aseGetPostFormArray(c *gin.Context) url.Values {
+// 	req := c.Request
+// 	req.ParseForm()
+// 	req.ParseMultipartForm(32 << 20) // 32 MB
+// 	return req.PostForm
+// }
+
+// func initGin(model sentiment.Models) {
+// 	var err error
+
+// 	fmt.Println("Starting gin")
+// 	r := gin.Default()
+
+// 	r.GET("/", func(c *gin.Context) {
+// 		c.JSON(http.StatusOK, gin.H{
+// 			"message": "Hello from the compute container",
+// 		})
+// 	})
+
+// 	r.POST("/insert", func(c *gin.Context) {
+// 		// URL like this: http://ase_compute:8080/insert or http://localhost:5000/insert from outside docker
+// 		// Header like this: Content-Type: application/x-www-form-urlencoded
+// 		// Body like this: Content-Type: timestamp1=I+like+cake
+// 		fmt.Println(c.Query("term"))
+// 		tweets := aseGetPostFormArray(c) // get tweets from queue later
+
+// 		// find all terms
+// 		// ### TODO: Do this only when new term was registered
+// 		var allTerms []AseTerm
+// 		err = collection.Find(nil).Select(bson.M{"term": 1}).All(&allTerms)
+// 		if err != nil {
+// 			fmt.Println(err)
+// 		}
+// 		// ###
+
+// 		if tweets != nil && len(tweets) > 0 { // at least 1 tweet should be passed (arrays are supported)
+
+// 			for key, value := range tweets {
+// 				for _, term := range allTerms {
+// 					if strings.Contains(strings.ToLower(value[0]), strings.ToLower(term.Term)) {
+// 						fmt.Println("'" + value[0] + "' contains " + term.Term)
+// 						pushToArray := bson.M{"$push": bson.M{"data": AseSentimentData{sentimentCdipaolo(value[0], model), key}}}
+// 						err = collection.Update(bson.M{"_id": term.ID}, pushToArray)
+// 						if err == nil {
+// 							fmt.Println("Update on " + term.ID + " successful")
+// 						} else {
+// 							fmt.Println("Update on " + term.ID + " NOT successful")
+// 						}
+// 					}
+// 				}
+// 			}
+// 		} else {
+// 			fmt.Println("no tweet received")
+// 		}
+// 	})
+// 	fmt.Println("Running ...")
+// 	r.Run()
+// }
+
+func startWorker(model sentiment.Models, terms []db.Term) {
+
 }
 
 func main() {
 
-	var err error
+	var model = initSentimentAnalysis()
 
-	// sentiment analysis
-	fmt.Println("Starting sentiment analysis")
-	model, err = sentiment.Restore()
-	if err != nil {
-		panic(fmt.Sprintf("Could not restore model!\n\t%v\n", err))
+	initDB()
+
+	for i := 0; i < _number_of_threads; i++ {
+		go startWorker(model, _terms)
 	}
-
-	// mongo
-	fmt.Println("Connecting to mongodb")
-	session, err := mgo.Dial("mongodb://127.0.0.1:27017") // local
-	// session, err := mgo.Dial("mongodb://ase_timeseries:27017") // docker
-
-	if err != nil {
-		panic(err)
-	}
-	defer session.Close()
-
-	collection := session.DB("test").C("terms")
-
-	// gin
-	fmt.Println("Starting gin")
-	r := gin.Default()
-
-	r.GET("/", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"message": "Hello from the compute container",
-		})
-	})
-
-	r.POST("/insert", func(c *gin.Context) {
-		// URL like this: http://ase_compute:8080/insert or http://localhost:5000/insert from outside docker
-		// Header like this: Content-Type: application/x-www-form-urlencoded
-		// Body like this: Content-Type: timestamp1=I+like+cake
-		fmt.Println(c.Query("term"))
-		tweets := aseGetPostFormArray(c) // get tweets from queue later
-
-		// find all terms
-		// ### TODO: Do this only when new term was registered
-		var allTerms []AseTerm
-		err = collection.Find(nil).Select(bson.M{"term": 1}).All(&allTerms)
-		if err != nil {
-			fmt.Println(err)
-		}
-		// ###
-
-		if tweets != nil && len(tweets) > 0 { // at least 1 tweet should be passed (arrays are supported)
-
-			for key, value := range tweets {
-				for _, term := range allTerms {
-					if strings.Contains(strings.ToLower(value[0]), strings.ToLower(term.Term)) {
-						fmt.Println("'" + value[0] + "' contains " + term.Term)
-						pushToArray := bson.M{"$push": bson.M{"data": AseSentimentData{sentimentCdipaolo(value[0]), key}}}
-						err = collection.Update(bson.M{"_id": term.ID}, pushToArray)
-						if err == nil {
-							fmt.Println("Update on " + term.ID + " successful")
-						} else {
-							fmt.Println("Update on " + term.ID + " NOT successful")
-						}
-					}
-				}
-			}
-		} else {
-			fmt.Println("no tweet received")
-		}
-	})
-	fmt.Println("Running ...")
-	r.Run()
 
 }
