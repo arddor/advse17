@@ -14,7 +14,7 @@ var session *r.Session
 type Term struct {
 	ID      string      `json:"id" gorethink:"id,omitempty"`
 	Term    string      `json:"term" gorethink:"term"`
-	Data    []Sentiment `json:"data" gorethink:"data"`
+	Data    []Sentiment `json:"data, omitempty" gorethink:"data"`
 	Created time.Time   `json:"created" gorethink:"created"`
 }
 
@@ -100,7 +100,7 @@ func CreateTerm(term string) (*Term, error) {
 // AddSentiment pushes a sentiment into the term with the id
 func AddSentiment(id string, sentiment Sentiment) error {
 	_, err := r.Table("items").Get(id).
-		Update(map[string]interface{}{"data": r.Row.Field("Data").Append(sentiment)}).
+		Update(map[string]interface{}{"data": r.Row.Field("data").Append(sentiment)}).
 		RunWrite(session)
 
 	return err

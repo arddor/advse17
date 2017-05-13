@@ -118,7 +118,7 @@ func main() {
 	}
 
 	var terms []db.Term
-	terms, error := db.GetTerms()
+	terms, error := db.GetTerms(false)
 
 	if error != nil {
 		log.Fatal(err)

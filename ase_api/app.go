@@ -34,7 +34,7 @@ func (s *Server) Run(addr string) {
 }
 
 func (s *Server) listTerms(c *gin.Context) {
-	terms, err := db.GetTerms(true)
+	terms, err := db.GetTerms(false)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": "Error",
