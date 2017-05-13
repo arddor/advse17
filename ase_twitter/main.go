@@ -3,19 +3,18 @@
 package main
 
 import (
+	"ase_api/db"
 	"fmt"
 	"log"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
-	"ase_api/db"
-	
-	"github.com/dghubble/oauth1"
+
 	"github.com/dghubble/go-twitter/twitter"
+	"github.com/dghubble/oauth1"
 	"github.com/streadway/amqp"
 )
-
 
 // Incoming tweets need to be directly stored into the queue
 // https://github.com/streadway/amqp
@@ -25,23 +24,23 @@ import (
 // then start listening for term updates
 
 var (
-trackingParams []string
+	trackingParams []string
 )
 
 func addTrackingParam(param string) {
-trackingParams = append(trackingParams, param)
+	trackingParams = append(trackingParams, param)
 }
 
 func removeTrackingParam(param string) {
-// TODO: check if this works
-k := 0
-for _, n := range trackingParams {
-    if n != param { // filter
-        trackingParams[k] = n
-        k++
-    }
-}
-trackingParams = trackingParams[:k] // set slice len to remaining elements
+	// TODO: check if this works
+	k := 0
+	for _, n := range trackingParams {
+		if n != param { // filter
+			trackingParams[k] = n
+			k++
+		}
+	}
+	trackingParams = trackingParams[:k] // set slice len to remaining elements
 }
 
 func connectToMQ() *amqp.Connection {
@@ -68,10 +67,6 @@ func failOnError(err error, msg string) {
 }
 
 func main() {
-
-//TODO: docker dependency
-// use docker-compose depends_on
-
 
 // authenticate
 // TODO: change this so the keys are not in clear text
@@ -135,34 +130,34 @@ db.Initialize("ase_timeseries:28015")
 		// publish a message to the queue
 		body := text
 		err = ch.Publish(
-		"",     // exchange
-		q.Name, // routing key
-		false,  // mandatory
-		false,  // immediate
-		amqp.Publishing {
-		DeliveryMode: amqp.Persistent,
-		ContentType: "text/plain",
-		MessageId: timestamp,
-		Body:        []byte(body),
-		})
+			"",     // exchange
+			q.Name, // routing key
+			false,  // mandatory
+			false,  // immediate
+			amqp.Publishing{
+				DeliveryMode: amqp.Persistent,
+				ContentType:  "text/plain",
+				MessageId:    timestamp,
+				Body:         []byte(body),
+			})
 		failOnError(err, "Failed to publish a message")
 	}
 
-var terms []db.Term
-terms, error := db.GetTerms();
+	var terms []db.Term
+	terms, error := db.GetTerms(false)
 
 	if error != nil {
 		fmt.Println(error)
 	}
-	
-for _, term := range terms {
-addTrackingParam(term.Term)
-}
 
-params := &twitter.StreamFilterParams{
-		Track: trackingParams,
+	for _, term := range terms {
+		addTrackingParam(term.Term)
+	}
+
+	params := &twitter.StreamFilterParams{
+		Track:         trackingParams,
 		StallWarnings: twitter.Bool(true),
-		}
+	}
 	stream, err = client.Streams.Filter(params)
 
 	if err != nil {
@@ -195,8 +190,6 @@ db.OnChange(func(change map[string]*db.Term) {
 		if err != nil {
 			log.Fatal(err)
 		}
-		// Receive messages until stopped or stream quits
-		go demux.HandleChan(stream.Messages)
 	}
 })
 

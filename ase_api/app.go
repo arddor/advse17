@@ -34,7 +34,7 @@ func (s *Server) Run(addr string) {
 }
 
 func (s *Server) listTerms(c *gin.Context) {
-	terms, err := db.GetTerms()
+	terms, err := db.GetTerms(false)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": "Error",
@@ -64,7 +64,7 @@ func (s *Server) createTerm(c *gin.Context) {
 
 func (s *Server) getTerm(c *gin.Context) {
 	id := c.Param("id")
-	term, err := db.GetTerm(id)
+	term, err := db.GetTerm(id, true)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": err,

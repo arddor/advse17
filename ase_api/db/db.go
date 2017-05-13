@@ -15,7 +15,7 @@ var session *r.Session
 type Term struct {
 	ID      string      `json:"id" gorethink:"id,omitempty"`
 	Term    string      `json:"term" gorethink:"term"`
-	Data    []Sentiment `json:"data" gorethink:"data"`
+	Data    []Sentiment `json:"data, omitempty" gorethink:"data"`
 	Created time.Time   `json:"created" gorethink:"created"`
 }
 
@@ -34,13 +34,30 @@ func Initialize(addr string) *r.Session {
 		log.Fatalln(err.Error())
 		panic("Connection could not be established")
 	}
+
+	// Create Database if not exists
+	r.DBList().Contains("term").Do(func(exists r.Term) r.Term {
+		return r.Branch(exists, "do nothing", r.DBCreate("term"))
+	}).Exec(session)
+	// Create Table if not exists
+	r.DB("term").TableList().Contains("items").Do(func(exists r.Term) r.Term {
+		return r.Branch(exists, "do nothing", r.DB("term").TableCreate("items"))
+	}).Exec(session)
+
 	return session
 }
 
-func GetTerms() ([]Term, error) {
+func GetTerms(includeSentimentData bool) ([]Term, error) {
 	var terms []Term
+	var res *r.Cursor
+	var err error
 
-	res, err := r.Table("items").Run(session)
+	if includeSentimentData {
+		res, err = r.Table("items").Run(session)
+	} else {
+		res, err = r.Table("items").Without("data").Default([]Term{}).Run(session)
+	}
+
 	if err != nil {
 		return nil, err
 	}
@@ -53,8 +70,16 @@ func GetTerms() ([]Term, error) {
 	return terms, nil
 }
 
-func GetTerm(id string) (*Term, error) {
-	cursor, err := r.Table("items").Get(id).Run(session)
+func GetTerm(id string, includeSentimentData bool) (*Term, error) {
+	var cursor *r.Cursor
+	var err error
+
+	if includeSentimentData {
+		cursor, err = r.Table("items").Get(id).Run(session)
+	} else {
+		cursor, err = r.Table("items").Get(id).Without("data").Run(session)
+	}
+
 	if err != nil {
 		return nil, err
 	}
@@ -88,7 +113,7 @@ func CreateTerm(term string) (*Term, error) {
 // AddSentiment pushes a sentiment into the term with the id
 func AddSentiment(id string, sentiment Sentiment) error {
 	_, err := r.Table("items").Get(id).
-		Update(map[string]interface{}{"data": r.Row.Field("Data").Append(sentiment)}).
+		Update(map[string]interface{}{"data": r.Row.Field("data").Append(sentiment)}).
 		RunWrite(session)
 
 	return err
@@ -96,6 +121,36 @@ func AddSentiment(id string, sentiment Sentiment) error {
 
 func OnChange(fn func(value map[string]*Term)) {
 	res, err := r.Table("items").Changes().Run(session)
+
+	var value map[string]*Term
+
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	for res.Next(&value) {
+		fn(value)
+	}
+}
+
+func OnAddSentiment(fn func(value Sentiment)) {
+	res, err := r.Table("items").Pluck("data").Changes().Map(func(doc r.Term) interface{} {
+		return doc.Field("new_val").Field("data").Nth(-1)
+	}).Run(session)
+
+	var value Sentiment
+
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	for res.Next(&value) {
+		fn(value)
+	}
+}
+
+func OnChangeNoData(fn func(value map[string]*Term)) {
+	res, err := r.Table("items").Without("data").Changes().Run(session)
 
 	var value map[string]*Term
 
