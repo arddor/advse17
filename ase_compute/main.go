@@ -13,6 +13,8 @@ import (
 
 	"ase_api/db" // I copied this to "C:\Users\B\go\src\ase_api" to work locally -> remove ir later
 
+	"sync"
+
 	"github.com/streadway/amqp"
 )
 
@@ -37,6 +39,7 @@ import (
 var (
 	_terms []db.Term
 	_model sentiment.Models
+	_mutex sync.Mutex
 )
 
 func failOnError(err error, msg string) {
@@ -79,8 +82,7 @@ func initDB() {
 			newTerm = change["new_val"]
 			oldTerm = change["old_val"]
 
-			// TODO: use channel to deliver terms or use Mutex
-
+			_mutex.Lock()
 			if oldTerm == nil { // term was added
 				_terms = append(_terms, *newTerm)
 				printLog("DB", "Term added: "+newTerm.Term)
@@ -94,14 +96,16 @@ func initDB() {
 					}
 				}
 			}
+			_mutex.Unlock()
 		})
 	}()
 }
 
 func processTweet(timestamp string, tweet string) bool {
-
+	_mutex.Lock()
 	for _, term := range _terms {
 		if strings.Contains(strings.ToLower(tweet), strings.ToLower(term.Term)) {
+			_mutex.Unlock()
 			printLog("ProcessTweet", "'"+tweet+"' contains "+term.Term)
 			fmt.Print("'" + timestamp + "' converted to: ")
 			// layout := "2006-01-02T15:04:05.000Z" // Example
@@ -118,9 +122,10 @@ func processTweet(timestamp string, tweet string) bool {
 				printLog("ProcessTweet", "Could not add sentiment to DB!")
 				return false
 			}
+			return true
 		}
 	}
-	return true
+	return false
 }
 
 func startWorker() {
