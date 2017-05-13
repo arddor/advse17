@@ -45,10 +45,11 @@ func (s *Server) listTerms(c *gin.Context) {
 
 func (s *Server) createTerm(c *gin.Context) {
 	var param db.Term
+	
 	c.BindJSON(&param)
 
 	if param.Term == "" {
-		c.JSON(http.StatusBadRequest, "Term was empty")
+		c.JSON(http.StatusBadRequest, "Term was empty ")
 		return
 	}
 
@@ -73,6 +74,8 @@ func (s *Server) getTerm(c *gin.Context) {
 
 	c.JSON(http.StatusOK, term)
 }
+
+type Test struct {Term string `json:"term" gorethink:"term"` }
 
 /*
 func (s *Server) createTerm(c *gin.Context) {

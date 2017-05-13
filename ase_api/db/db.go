@@ -5,7 +5,8 @@ package db
 import (
 	"log"
 	"time"
-
+	"fmt"
+	
 	r "gopkg.in/gorethink/gorethink.v3"
 )
 
@@ -71,9 +72,11 @@ func CreateTerm(term string) (*Term, error) {
 		Data:    []Sentiment{},
 		Created: time.Now(),
 	}
-
+	fmt.Println(obj)
 	res, err := r.Table("items").Insert(obj).RunWrite(session)
 	if err != nil {
+	fmt.Println("Some error ...")
+	log.Fatal(err)
 		return nil, err
 	}
 

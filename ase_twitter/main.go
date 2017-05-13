@@ -44,14 +44,34 @@ for _, n := range trackingParams {
 trackingParams = trackingParams[:k] // set slice len to remaining elements
 }
 
+func connectToMQ() (*amqp.Connection, error){
+	var conn *amqp.Connection
+	var err error
+	conn, err = amqp.Dial("amqp://ase_queue:5672")
+	if err != nil {
+	time.Sleep(3000 * time.Millisecond)
+		conn, err = amqp.Dial("amqp://ase_queue:5672")
+	}
+	if err != nil {
+	return conn, err
+	}
+	return conn, nil
+}
+
 func failOnError(err error, msg string) {
   if err != nil {
     log.Fatalf("%s: %s", msg, err)
     fmt.Sprintf("%s: %s", msg, err)
+	fmt.Print("FailOnError")
   }
 }
 
 func main() {
+
+//TODO: docker dependency
+// use docker-compose depends_on
+
+
 // authenticate
 // TODO: change this so the keys are not in clear text
 consumerKey := "TheYSOyWqkVy5LS4AFj10LrXy"
@@ -63,16 +83,15 @@ config := oauth1.NewConfig(consumerKey, consumerSecret)
 token := oauth1.NewToken(accessToken, accessSecret)
 httpClient := config.Client(oauth1.NoContext, token)
 var err error
+var conn *amqp.Connection
 // connect to RabbitMQ server
-// TODO: change url
-conn, err := amqp.Dial("amqp://ase_queue:5672")
+conn, err = connectToMQ()
 failOnError(err, "Failed to connect to RabbitMQ")
-defer conn.Close()
 
 // create a channel
 ch, err := conn.Channel()
 failOnError(err, "Failed to open a channel")
-defer ch.Close()
+defer conn.Close()
 
 // declare a queue for us to send to
 q, err := ch.QueueDeclare(
@@ -84,10 +103,7 @@ q, err := ch.QueueDeclare(
   nil,     // arguments
 )
 failOnError(err, "Failed to declare a queue")
-
-//TODO: docker dependency
-// use docker-compose depends_on
-time.Sleep(3000 * time.Millisecond)
+defer ch.Close()
 
 var stream *twitter.Stream
 
@@ -101,7 +117,7 @@ db.Initialize("ase_timeseries:28015")
 
 		text := tweet.Text
 		timestamp := tweet.CreatedAt
-		fmt.Println(text)
+		
 		// publish a message to the queue
 		body := text
 		err = ch.Publish(
@@ -122,7 +138,7 @@ var terms []db.Term
 terms, error := db.GetTerms();
 
 	if error != nil {
-		log.Fatal(err)
+		fmt.Println(error)
 	}
 	
 for _, term := range terms {
@@ -149,10 +165,10 @@ db.OnChange(func(change map[string]*db.Term) {
 	if oldTerm != tempTerm {
 	// TODO: check conditions
 	// does this work with if just newTerm != nil? so just else?
-		if (oldTerm == nil && newTerm != nil) || newTerm != nil {
+		if (oldTerm == nil && tempTerm != nil) || tempTerm != nil {
 			addTrackingParam(tempTerm.Term)
 		}
-		if newTerm == nil {
+		if tempTerm == nil {
 			removeTrackingParam(tempTerm.Term)
 		}
 		stream.Stop()
