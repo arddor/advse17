@@ -28,7 +28,25 @@ var (
 )
 
 func addTrackingParam(param string) {
+	k := 0
+	for _, n := range trackingParams {
+		if n != param { // filter
+			trackingParams[k] = n
+			k++
+		}
+	}
+
 	trackingParams = append(trackingParams, param)
+}
+
+func paramAlreadyTracked(param string) bool {
+
+	for _, n := range trackingParams {
+		if n == param { // filter
+			return true
+		}
+	}
+return false
 }
 
 func removeTrackingParam(param string) {
@@ -126,7 +144,7 @@ db.Initialize("ase_timeseries:28015")
 
 		text := tweet.Text
 		timestamp := tweet.CreatedAt
-		
+		//fmt.Println(text)
 		// publish a message to the queue
 		body := text
 		err = ch.Publish(
@@ -142,7 +160,7 @@ db.Initialize("ase_timeseries:28015")
 			})
 		failOnError(err, "Failed to publish a message")
 	}
-
+	
 	var terms []db.Term
 	terms, error := db.GetTerms(false)
 
@@ -164,6 +182,8 @@ db.Initialize("ase_timeseries:28015")
 		log.Fatal(err)
 	}
 	// Receive messages until stopped or stream quits
+	// @marc: TODO: is here a go routine sensible or should I leave the go out?
+	// Is there a need to implement a 'quit' handle in the routine?
 	go demux.HandleChan(stream.Messages)
 
 db.OnChange(func(change map[string]*db.Term) {
@@ -171,22 +191,35 @@ db.OnChange(func(change map[string]*db.Term) {
 	var oldTerm *db.Term
 	tempTerm = change["new_val"]
 	oldTerm = change["old_val"]
+	fmt.Println( "Change: " )
 	if oldTerm != tempTerm {
 	// TODO: check conditions
-	// does this work with if just newTerm != nil? so just else?
-		if (oldTerm == nil && tempTerm != nil) || tempTerm != nil {
-			addTrackingParam(tempTerm.Term)
-		}
+
 		if tempTerm == nil {
-			removeTrackingParam(tempTerm.Term)
+			removeTrackingParam(oldTerm.Term)
+			fmt.Println(oldTerm.Term + " deleted." )
 		}
+		
+		if (oldTerm == nil && tempTerm != nil) || tempTerm != nil {
+			if paramAlreadyTracked(tempTerm.Term) {
+				return
+			}
+			
+				addTrackingParam(tempTerm.Term)
+				fmt.Println(tempTerm.Term + " added." )
+			
+		}
+		
 		stream.Stop()
 		params := &twitter.StreamFilterParams{
 			Track: trackingParams,
 			StallWarnings: twitter.Bool(true),
 		}
 		stream, err = client.Streams.Filter(params)
-
+		// @marc: TODO: can this be handled in that way or do I have to somehow close the opened
+		// go routine and open a new one?
+		//go demux.HandleChan(stream.Messages)
+		demux.HandleChan(stream.Messages)
 		if err != nil {
 			log.Fatal(err)
 		}
