@@ -5,7 +5,8 @@ package db
 import (
 	"log"
 	"time"
-
+	"fmt"
+	
 	r "gopkg.in/gorethink/gorethink.v3"
 )
 
@@ -33,6 +34,16 @@ func Initialize(addr string) *r.Session {
 		log.Fatalln(err.Error())
 		panic("Connection could not be established")
 	}
+
+	// Create Database if not exists
+	r.DBList().Contains("term").Do(func(exists r.Term) r.Term {
+		return r.Branch(exists, "do nothing", r.DBCreate("term"))
+	}).Exec(session)
+	// Create Table if not exists
+	r.DB("term").TableList().Contains("items").Do(func(exists r.Term) r.Term {
+		return r.Branch(exists, "do nothing", r.DB("term").TableCreate("items"))
+	}).Exec(session)
+
 	return session
 }
 
@@ -44,7 +55,7 @@ func GetTerms(includeSentimentData bool) ([]Term, error) {
 	if includeSentimentData {
 		res, err = r.Table("items").Run(session)
 	} else {
-		res, err = r.Table("items").Without("data").Run(session)
+		res, err = r.Table("items").Without("data").Default([]Term{}).Run(session)
 	}
 
 	if err != nil {
@@ -86,9 +97,11 @@ func CreateTerm(term string) (*Term, error) {
 		Data:    []Sentiment{},
 		Created: time.Now(),
 	}
-
+	fmt.Println(obj)
 	res, err := r.Table("items").Insert(obj).RunWrite(session)
 	if err != nil {
+	fmt.Println("Some error ...")
+	log.Fatal(err)
 		return nil, err
 	}
 
@@ -110,6 +123,22 @@ func OnChange(fn func(value map[string]*Term)) {
 	res, err := r.Table("items").Changes().Run(session)
 
 	var value map[string]*Term
+
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	for res.Next(&value) {
+		fn(value)
+	}
+}
+
+func OnAddSentiment(fn func(value Sentiment)) {
+	res, err := r.Table("items").Pluck("data").Changes().Map(func(doc r.Term) interface{} {
+		return doc.Field("new_val").Field("data").Nth(-1)
+	}).Run(session)
+
+	var value Sentiment
 
 	if err != nil {
 		log.Fatalln(err)

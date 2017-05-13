@@ -13,8 +13,10 @@
   "dependencies": {
     "axios": "^0.16.1",
     "bulma": "^0.4.1",
+    "plotly.js": "^1.27.0",
     "vue": "^2.2.6",
-    "vue-router": "^2.3.1"
+    "vue-router": "^2.3.1",
+    "vue-spinner": "^1.0.2"
   },
   "devDependencies": {
     "autoprefixer": "^6.7.2",
