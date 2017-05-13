@@ -3,10 +3,10 @@
 package db
 
 import (
+	"fmt"
 	"log"
 	"time"
-	"fmt"
-	
+
 	r "gopkg.in/gorethink/gorethink.v3"
 )
 
@@ -21,7 +21,7 @@ type Term struct {
 
 type Sentiment struct {
 	Timestamp time.Time `json:"time" gorethink:"timestamp"`
-	Sentiment int       `json:"sentiment" gorethink:"sentiment"`
+	Sentiment float32   `json:"sentiment" gorethink:"sentiment"`
 }
 
 func Initialize(addr string) *r.Session {
@@ -100,8 +100,8 @@ func CreateTerm(term string) (*Term, error) {
 	fmt.Println(obj)
 	res, err := r.Table("items").Insert(obj).RunWrite(session)
 	if err != nil {
-	fmt.Println("Some error ...")
-	log.Fatal(err)
+		fmt.Println("Some error ...")
+		log.Fatal(err)
 		return nil, err
 	}
 

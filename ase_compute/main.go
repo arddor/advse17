@@ -5,11 +5,10 @@ package main
 import (
 	"fmt"
 	"log"
-	"strconv"
 	"strings"
 	"time"
 
-	"github.com/cdipaolo/sentiment"
+	hc "cirello.io/HumorChecker"
 
 	"ase_api/db" // I copied this to "C:\Users\B\go\src\ase_api" to work locally -> remove ir later
 
@@ -37,9 +36,9 @@ import (
 // ideally each compute node will get notified from the DB with new terms
 
 var (
-	_terms []db.Term
-	_model sentiment.Models
-	_mutex sync.Mutex
+	_terms        []db.Term
+	_mutex        sync.Mutex
+	_maxSentiment = 6
 )
 
 func failOnError(err error, msg string) {
@@ -53,16 +52,21 @@ func printLog(prefix string, msg string) {
 	fmt.Println("[" + prefix + "] " + msg)
 }
 
-func initSentimentAnalysis() sentiment.Models {
-	printLog("Sentiment", "Starting ...")
-	var model, err = sentiment.Restore()
-	failOnError(err, "Could not restore model!")
-	return model
+func clipping(score int, max int) int {
+	if score < -max {
+		score = -max
+	} else if score > max {
+		score = max
+	}
+	return score
 }
 
-func sentimentCdipaolo(sentence string, model sentiment.Models) uint8 {
-	var score = model.SentimentAnalysis(sentence, sentiment.English).Score
-	printLog("Sentiment", "Sentiment for '"+sentence+"': "+strconv.Itoa(int(score)))
+func computeSentiment(sentence string) float32 {
+	var rawScore = clipping(hc.Analyze(sentence).Score, _maxSentiment)
+
+	var score = float32(_maxSentiment+rawScore) / float32(2*_maxSentiment)
+	printLog("Sentiment", "Sentiment Score:")
+	fmt.Println(score)
 	return score
 }
 
@@ -106,7 +110,7 @@ func processTweet(timestamp string, tweet string) bool {
 	for _, term := range _terms {
 		if strings.Contains(strings.ToLower(tweet), strings.ToLower(term.Term)) {
 			_mutex.Unlock()
-			printLog("ProcessTweet", "'"+tweet+"' contains "+term.Term)
+			printLog("ProcessTweet", "Tweet contains "+term.Term)
 			fmt.Print("'" + timestamp + "' converted to: ")
 			// layout := "2006-01-02T15:04:05.000Z" // Example
 			layout := "Mon Jan 02 15:04:05 +0000 2006"
@@ -116,7 +120,7 @@ func processTweet(timestamp string, tweet string) bool {
 				printLog("ProcessTweet", "Could not convert timestamp!")
 				return false
 			}
-			var sentimentData = db.Sentiment{Timestamp: t, Sentiment: int(sentimentCdipaolo(tweet, _model))}
+			var sentimentData = db.Sentiment{Timestamp: t, Sentiment: computeSentiment(tweet)}
 			err = db.AddSentiment(term.ID, sentimentData)
 			if err != nil {
 				printLog("ProcessTweet", "Could not add sentiment to DB!")
@@ -125,7 +129,9 @@ func processTweet(timestamp string, tweet string) bool {
 			return true
 		}
 	}
-	return false
+	_mutex.Unlock()
+	printLog("ProcessTweet", "Tweet does not contain a term")
+	return true
 }
 
 func startWorker() {
@@ -182,8 +188,6 @@ func main() {
 	// TODO: docker dependency
 	// use docker-compose depends_on
 	time.Sleep(3000 * time.Millisecond)
-
-	_model = initSentimentAnalysis()
 
 	initDB()
 

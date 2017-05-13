@@ -13,8 +13,8 @@ RUN go get github.com/beego/bee
 # https://github.com/gin-gonic/gin
 RUN go get github.com/gin-gonic/gin
 
-# https://github.com/cdipaolo/sentiment
-RUN go get github.com/cdipaolo/sentiment
+# https://github.com/ucirello/HumorChecker
+RUN go get cirello.io/HumorChecker
 
 # https://github.com/GoRethink/gorethink - RethinkDB
 RUN go get github.com/GoRethink/gorethink
