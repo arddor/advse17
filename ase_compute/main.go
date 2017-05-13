@@ -4,12 +4,16 @@ package main
 
 import (
 	"fmt"
+	"log"
+	"strconv"
+	"strings"
+	"time"
 
 	"github.com/cdipaolo/sentiment"
 
-	"gopkg.in/mgo.v2/bson"
-
 	"ase_api/db" // I copied this to "C:\Users\B\go\src\ase_api" to work locally -> remove ir later
+
+	"github.com/streadway/amqp"
 )
 
 // Needs to process the queue
@@ -31,138 +35,153 @@ import (
 // ideally each compute node will get notified from the DB with new terms
 
 var (
-	_terms             []db.Term
-	_number_of_threads = 10
+	_terms []db.Term
+	_model sentiment.Models
 )
 
-// AseSentimentData sentiment data including timestamp
-type AseSentimentData struct {
-	Sentiment uint8
-	Timestamp string
+func failOnError(err error, msg string) {
+	if err != nil {
+		log.Fatalf("%s: %s", msg, err)
+		panic(fmt.Sprintf("%s: %s", msg, err))
+	}
 }
 
-// AseTerm term with associated data
-type AseTerm struct {
-	ID   bson.ObjectId `json:"id" bson:"_id,omitempty"`
-	Term string
-	Data []AseSentimentData
+func printLog(prefix string, msg string) {
+	fmt.Println("[" + prefix + "] " + msg)
 }
 
 func initSentimentAnalysis() sentiment.Models {
-	fmt.Println("Starting sentiment analysis")
+	printLog("Sentiment", "Starting ...")
 	var model, err = sentiment.Restore()
-	if err != nil {
-		panic(fmt.Sprintf("Could not restore model!\n\t%v\n", err))
-	}
+	failOnError(err, "Could not restore model!")
 	return model
 }
 
 func sentimentCdipaolo(sentence string, model sentiment.Models) uint8 {
 	var score = model.SentimentAnalysis(sentence, sentiment.English).Score
-	fmt.Println("Sentiment for '"+sentence+"':", score)
+	printLog("Sentiment", "Sentiment for '"+sentence+"': "+strconv.Itoa(int(score)))
 	return score
 }
 
 func initDB() {
-	var err error
+	printLog("DB", "Starting ...")
 
 	db.Initialize("ase_timeseries:28015")
 
-	_terms, err = db.GetTerms()
-	if err != nil {
-		panic(fmt.Sprintf("Could not retrieve terms!\n\t%v\n", err))
+	_terms, _ = db.GetTerms(false)
+	if _terms == nil {
+		printLog("DB", "No terms registered yet")
 	}
+	go func() {
+		db.OnChangeNoData(func(change map[string]*db.Term) {
+			var newTerm *db.Term
+			var oldTerm *db.Term
+			newTerm = change["new_val"]
+			oldTerm = change["old_val"]
 
-	db.OnChange(func(change map[string]*db.Term) {
-		var newTerm *db.Term
-		var oldTerm *db.Term
-		newTerm = change["new_val"]
-		oldTerm = change["old_val"]
-		if oldTerm == nil { // term was added
-			_terms = append(_terms, *newTerm)
-		} else if newTerm == nil { // term was removed
-			for index, t := range _terms {
-				if t.Term == oldTerm.Term {
-					_terms[index] = _terms[len(_terms)-1] // Replace it with the last one.
-					_terms = _terms[:len(_terms)-1]       // Chop off the last one
-					break
+			// TODO: use channel to deliver terms or use Mutex
+
+			if oldTerm == nil { // term was added
+				_terms = append(_terms, *newTerm)
+				printLog("DB", "Term added: "+newTerm.Term)
+			} else if newTerm == nil { // term was removed
+				for index, t := range _terms {
+					if t.Term == oldTerm.Term {
+						_terms[index] = _terms[len(_terms)-1] // Replace it with the last one.
+						_terms = _terms[:len(_terms)-1]       // Chop off the last one
+						printLog("DB", "Term deleted: "+oldTerm.Term)
+						break
+					}
 				}
 			}
-		}
-	})
+		})
+	}()
 }
 
-// func aseGetPostFormArray(c *gin.Context) url.Values {
-// 	req := c.Request
-// 	req.ParseForm()
-// 	req.ParseMultipartForm(32 << 20) // 32 MB
-// 	return req.PostForm
-// }
+func processTweet(timestamp string, tweet string) bool {
 
-// func initGin(model sentiment.Models) {
-// 	var err error
+	for _, term := range _terms {
+		if strings.Contains(strings.ToLower(tweet), strings.ToLower(term.Term)) {
+			printLog("ProcessTweet", "'"+tweet+"' contains "+term.Term)
+			fmt.Print("'" + timestamp + "' converted to: ")
+			// layout := "2006-01-02T15:04:05.000Z" // Example
+			layout := "Mon Jan 02 15:04:05 +0000 2006"
+			t, err := time.Parse(layout, timestamp)
+			fmt.Print("'" + t.String() + "'\n")
+			if err != nil {
+				printLog("ProcessTweet", "Could not convert timestamp!")
+				return false
+			}
+			var sentimentData = db.Sentiment{Timestamp: t, Sentiment: int(sentimentCdipaolo(tweet, _model))}
+			err = db.AddSentiment(term.ID, sentimentData)
+			if err != nil {
+				printLog("ProcessTweet", "Could not add sentiment to DB!")
+				return false
+			}
+		}
+	}
+	return true
+}
 
-// 	fmt.Println("Starting gin")
-// 	r := gin.Default()
+func startWorker() {
+	printLog("Worker", "Starting ...")
+	conn, err := amqp.Dial("amqp://ase_queue:5672")
+	failOnError(err, "Failed to connect to RabbitMQ")
+	defer conn.Close()
 
-// 	r.GET("/", func(c *gin.Context) {
-// 		c.JSON(http.StatusOK, gin.H{
-// 			"message": "Hello from the compute container",
-// 		})
-// 	})
+	// create a channel
+	ch, err := conn.Channel()
+	failOnError(err, "Failed to open a channel")
+	defer ch.Close()
 
-// 	r.POST("/insert", func(c *gin.Context) {
-// 		// URL like this: http://ase_compute:8080/insert or http://localhost:5000/insert from outside docker
-// 		// Header like this: Content-Type: application/x-www-form-urlencoded
-// 		// Body like this: Content-Type: timestamp1=I+like+cake
-// 		fmt.Println(c.Query("term"))
-// 		tweets := aseGetPostFormArray(c) // get tweets from queue later
+	// declare a queue for us to send to
+	q, err := ch.QueueDeclare(
+		"tweet", // name
+		true,    // durable -> queue is not "lost" even when rabbitMQ crashes
+		false,   // delete when unused
+		false,   // exclusive
+		false,   // no-wait
+		nil,     // arguments
+	)
+	failOnError(err, "Failed to declare a queue")
 
-// 		// find all terms
-// 		// ### TODO: Do this only when new term was registered
-// 		var allTerms []AseTerm
-// 		err = collection.Find(nil).Select(bson.M{"term": 1}).All(&allTerms)
-// 		if err != nil {
-// 			fmt.Println(err)
-// 		}
-// 		// ###
+	msgs, err := ch.Consume(
+		q.Name, // queue
+		"",     // consumer
+		false,  // auto-ack
+		false,  // exclusive
+		false,  // no-local
+		false,  // no-wait
+		nil,    // args
+	)
+	failOnError(err, "Failed to register a consumer")
 
-// 		if tweets != nil && len(tweets) > 0 { // at least 1 tweet should be passed (arrays are supported)
+	forever := make(chan bool)
 
-// 			for key, value := range tweets {
-// 				for _, term := range allTerms {
-// 					if strings.Contains(strings.ToLower(value[0]), strings.ToLower(term.Term)) {
-// 						fmt.Println("'" + value[0] + "' contains " + term.Term)
-// 						pushToArray := bson.M{"$push": bson.M{"data": AseSentimentData{sentimentCdipaolo(value[0], model), key}}}
-// 						err = collection.Update(bson.M{"_id": term.ID}, pushToArray)
-// 						if err == nil {
-// 							fmt.Println("Update on " + term.ID + " successful")
-// 						} else {
-// 							fmt.Println("Update on " + term.ID + " NOT successful")
-// 						}
-// 					}
-// 				}
-// 			}
-// 		} else {
-// 			fmt.Println("no tweet received")
-// 		}
-// 	})
-// 	fmt.Println("Running ...")
-// 	r.Run()
-// }
+	go func() {
+		for d := range msgs {
+			printLog("Worker", "Received a tweet: "+string(d.Body))
+			if processTweet(d.MessageId, string(d.Body)) {
+				d.Ack(false)
+			} else {
+				d.Nack(false, true)
+			}
+		}
+	}()
 
-func startWorker(model sentiment.Models, terms []db.Term) {
-
+	printLog("Worker", " Waiting for messages. To exit press CTRL+C")
+	<-forever
 }
 
 func main() {
+	// TODO: docker dependency
+	// use docker-compose depends_on
+	time.Sleep(3000 * time.Millisecond)
 
-	var model = initSentimentAnalysis()
+	_model = initSentimentAnalysis()
 
 	initDB()
 
-	for i := 0; i < _number_of_threads; i++ {
-		go startWorker(model, _terms)
-	}
+	startWorker()
 
 }

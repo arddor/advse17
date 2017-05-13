@@ -36,10 +36,17 @@ func Initialize(addr string) *r.Session {
 	return session
 }
 
-func GetTerms() ([]Term, error) {
+func GetTerms(includeSentimentData bool) ([]Term, error) {
 	var terms []Term
+	var res *r.Cursor
+	var err error
 
-	res, err := r.Table("items").Run(session)
+	if includeSentimentData {
+		res, err = r.Table("items").Run(session)
+	} else {
+		res, err = r.Table("items").Without("data").Run(session)
+	}
+
 	if err != nil {
 		return nil, err
 	}
@@ -52,8 +59,16 @@ func GetTerms() ([]Term, error) {
 	return terms, nil
 }
 
-func GetTerm(id string) (*Term, error) {
-	cursor, err := r.Table("items").Get(id).Run(session)
+func GetTerm(id string, includeSentimentData bool) (*Term, error) {
+	var cursor *r.Cursor
+	var err error
+
+	if includeSentimentData {
+		cursor, err = r.Table("items").Get(id).Run(session)
+	} else {
+		cursor, err = r.Table("items").Get(id).Without("data").Run(session)
+	}
+
 	if err != nil {
 		return nil, err
 	}
@@ -93,6 +108,20 @@ func AddSentiment(id string, sentiment Sentiment) error {
 
 func OnChange(fn func(value map[string]*Term)) {
 	res, err := r.Table("items").Changes().Run(session)
+
+	var value map[string]*Term
+
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	for res.Next(&value) {
+		fn(value)
+	}
+}
+
+func OnChangeNoData(fn func(value map[string]*Term)) {
+	res, err := r.Table("items").Without("data").Changes().Run(session)
 
 	var value map[string]*Term
 
