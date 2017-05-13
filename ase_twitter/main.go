@@ -44,19 +44,20 @@ for _, n := range trackingParams {
 trackingParams = trackingParams[:k] // set slice len to remaining elements
 }
 
-func connectToMQ() (*amqp.Connection, error){
-	var conn *amqp.Connection
-	var err error
-	conn, err = amqp.Dial("amqp://ase_queue:5672")
-	if err != nil {
-	time.Sleep(3000 * time.Millisecond)
+func connectToMQ() *amqp.Connection {
+	for {
+		var conn *amqp.Connection
+		var err error
 		conn, err = amqp.Dial("amqp://ase_queue:5672")
+		if err == nil {
+			return conn
+		}
+		// else, reconnect after timeout
+		time.Sleep(3000 * time.Millisecond)
 	}
-	if err != nil {
-	return conn, err
-	}
-	return conn, nil
 }
+
+
 
 func failOnError(err error, msg string) {
   if err != nil {
@@ -82,11 +83,24 @@ accessSecret := "MlUhiDtWbYtMa1w3xLERmcATc6WVXYRr69xKGmnpslsWt"
 config := oauth1.NewConfig(consumerKey, consumerSecret)
 token := oauth1.NewToken(accessToken, accessSecret)
 httpClient := config.Client(oauth1.NoContext, token)
+
+//rabbitCloseError chan *amqp.Error
+//rabbitCloseError = make(chan *amqp.Error)
+
 var err error
 var conn *amqp.Connection
+
+connError := make(chan *amqp.Error)
+go func(){
+err := <- connError
+log.Println("reconnect: " + err.Error())
+conn = connectToMQ()
+}()
+
 // connect to RabbitMQ server
-conn, err = connectToMQ()
+conn = connectToMQ()
 failOnError(err, "Failed to connect to RabbitMQ")
+conn.NotifyClose(connError)
 
 // create a channel
 ch, err := conn.Channel()
