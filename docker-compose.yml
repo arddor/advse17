@@ -84,3 +84,16 @@ services:
     depends_on:
       - ase_timeseries
       - ase_queue
+
+
+  ase_web:
+    build: ase_web
+    container_name: ase_web
+    ports:
+      - "5050:8080"
+    volumes:
+      - ./ase_web:/usr/src/app
+    working_dir: /usr/src/app
+    depends_on:
+      # API calls
+      - ase_timeseries
