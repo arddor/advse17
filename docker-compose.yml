@@ -11,7 +11,7 @@ version: "3"
 services:
 
   ase_api:
-    build: ./_base
+    build: ase_api
     container_name: ase_api
     ports:
       - "5002:8000"
@@ -26,7 +26,7 @@ services:
 
 
   ase_compute:
-    build: ./_base
+    build: ase_compute
     container_name: ase_compute
     ports:
       - "5000:8080"
@@ -61,7 +61,7 @@ services:
 
 
   ase_twitter:
-    build: ./_base
+    build: ase_twitter
     container_name: ase_twitter
     ports:
       - "5001:8080"
