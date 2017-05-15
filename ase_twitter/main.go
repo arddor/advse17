@@ -186,6 +186,7 @@ db.Initialize("ase_timeseries:28015")
 	// Is there a need to implement a 'quit' handle in the routine?
 	go demux.HandleChan(stream.Messages)
 
+// This gets called a lot due to inserts of sentiments
 db.OnChange(func(change map[string]*db.Term) {
 	var tempTerm *db.Term 
 	var oldTerm *db.Term
