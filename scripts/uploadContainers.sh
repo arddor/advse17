@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# https://cloud.google.com/container-registry/docs/managing
+
 
 gcloud config set project advse-167708
 
