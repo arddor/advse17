@@ -2,14 +2,101 @@
 
 package main
 
+import (
+	"ase_api/db"
+	"log"
+	"net/http"
+
+	"github.com/gin-gonic/gin"
+	r "gopkg.in/gorethink/gorethink.v3"
+)
+
 func main() {
 	s := Server{}
 	s.Initialize("ase_timeseries:28015")
 	s.Run(":8000")
 }
 
-// Needs endpoint to register terms
-// terms need to be stored into db and set to active (a simple flag will do)
+type Server struct {
+	Router *gin.Engine
+	DB     *r.Session
+}
 
-// Needs endpoint to DE-register term
-// term needs to be deactivated (a simple flag will do)
+func (s *Server) Initialize(addr string) {
+	s.DB = db.Initialize(addr)
+
+	s.Router = gin.Default()
+	s.initializeRoutes()
+}
+
+func (s *Server) initializeRoutes() {
+	s.Router.GET("/terms", s.listTerms)
+	s.Router.POST("/terms", s.createTerm)
+	s.Router.GET("/terms/:id", s.getTerm)
+}
+
+func (s *Server) Run(addr string) {
+	log.Fatal(s.Router.Run(addr))
+}
+
+func (s *Server) listTerms(c *gin.Context) {
+	terms, err := db.GetTerms(false)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": "Error",
+		})
+	}
+	c.JSON(http.StatusOK, terms)
+}
+
+func (s *Server) createTerm(c *gin.Context) {
+	var param db.Term
+
+	c.BindJSON(&param)
+
+	if param.Term == "" {
+		c.JSON(http.StatusBadRequest, "Term was empty ")
+		return
+	}
+
+	term, err := db.CreateTerm(param.Term)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, err)
+		return
+	}
+
+	c.JSON(http.StatusCreated, term)
+}
+
+func (s *Server) getTerm(c *gin.Context) {
+	id := c.Param("id")
+	term, err := db.GetTerm(id, true)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": err,
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, term)
+}
+
+type Test struct {Term string `json:"term" gorethink:"term"` }
+
+/*
+func (s *Server) createTerm(c *gin.Context) {
+	var term term
+	err := c.Bind(&term)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, err)
+		return
+	}
+
+	if err := term.createTerm(s.DB); err != nil {
+		c.JSON(http.StatusBadRequest, "Invalid request payload")
+		return
+	}
+
+	c.JSON(http.StatusCreated, term)
+}
+*/
