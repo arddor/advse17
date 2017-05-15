@@ -22,7 +22,9 @@ services:
       # register new terms
       - ase_timeseries
       # load generation
-      - ase_queue
+      #- ase_queue
+    depends_on:
+      - ase_timeseries
 
 
   ase_compute:
@@ -32,12 +34,16 @@ services:
       - "5000:8080"
     volumes:
       - ./ase_compute:/go/src/ase_compute
+      # Make this more elegant
       - ./ase_api:/go/src/ase_api
     working_dir: /go/src/ase_compute
     links:
       # fetch terms and update sentiment
       - ase_timeseries
       # fetch tweets to process
+      - ase_queue
+    depends_on:
+      - ase_timeseries
       - ase_queue
 
 
@@ -67,10 +73,14 @@ services:
       - "5001:8080"
     volumes:
       - ./ase_twitter:/go/src/ase_twitter
+      # Make this more elegant
       - ./ase_api:/go/src/ase_api
     working_dir: /go/src/ase_twitter
     links:
       # fetch terms
       - ase_timeseries
       # add tweets
+      - ase_queue
+    depends_on:
+      - ase_timeseries
       - ase_queue

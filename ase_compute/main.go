@@ -185,8 +185,6 @@ func startWorker() {
 }
 
 func main() {
-	// TODO: docker dependency
-	// use docker-compose depends_on
 	time.Sleep(3000 * time.Millisecond)
 
 	initDB()

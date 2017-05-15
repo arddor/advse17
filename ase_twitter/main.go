@@ -70,7 +70,7 @@ func connectToMQ() *amqp.Connection {
 			return conn
 		}
 		// else, reconnect after timeout
-		time.Sleep(3000 * time.Millisecond)
+		time.Sleep(1000 * time.Millisecond)
 	}
 }
 
