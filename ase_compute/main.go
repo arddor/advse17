@@ -135,9 +135,18 @@ func processTweet(timestamp string, tweet string) bool {
 }
 
 func startWorker() {
+	var conn *amqp.Connection
 	printLog("Worker", "Starting ...")
-	conn, err := amqp.Dial("amqp://ase_queue:5672")
-	failOnError(err, "Failed to connect to RabbitMQ")
+	for {
+		var err error
+		conn, err = amqp.Dial("amqp://ase_queue:5672")
+		if err == nil {
+			break
+		} else {
+			time.Sleep(1000 * time.Millisecond)
+		}
+	}
+	printLog("Worker", "Queue connected")
 	defer conn.Close()
 
 	// create a channel
