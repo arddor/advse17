@@ -12,7 +12,7 @@ spec:
         app: api
     spec:
       containers:
-      - name: ase_api
+      - name: api
         image: eu.gcr.io/advse-167708/ase_api
         ports:
         - containerPort: 8000

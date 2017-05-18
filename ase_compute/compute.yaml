@@ -12,5 +12,5 @@ spec:
         app: compute
     spec:
       containers:
-      - name: ase_compute
+      - name: compute
         image: eu.gcr.io/advse-167708/ase_compute
