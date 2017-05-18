@@ -10,8 +10,8 @@ RUN go get github.com/gin-gonic/gin
 # https://gopkg.in/gorethink/gorethink.v3
 RUN go get gopkg.in/gorethink/gorethink.v3
 
-# Expose the application on port 8080
-EXPOSE 8080
+# Expose the application on port 8000
+EXPOSE 8000
 
 # Set the entry point
 CMD ["go", "run", "main.go"]
