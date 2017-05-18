@@ -3,6 +3,8 @@ kind: Deployment
 metadata:
   name: timeseries-deployment
 spec:
+  # we're using a persistent disk
+  # it cannot scale beyond one replica
   replicas: 1
   template:
     metadata:
@@ -17,3 +19,18 @@ spec:
           name: admin
         - containerPort: 28015
           name: db
+        volumeMounts:
+        - name: rethink-persistent-storage
+          mountPath: /data
+      volumes:
+      - name: rethink-persistent-storage
+        gcePersistentDisk:
+          pdName: rethink-disk
+          fsType: ext4
+
+
+# Creating the disk
+
+#gcloud compute disks create --size 200GB rethink-disk
+
+# https://cloud.google.com/compute/docs/disks/add-persistent-disk#formatting
