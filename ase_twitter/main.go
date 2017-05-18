@@ -10,7 +10,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/arddor/advse17/ase_api/db"
+	"github.com/arddor/advse17/lib_db"
 
 	"github.com/dghubble/go-twitter/twitter"
 	"github.com/dghubble/oauth1"

@@ -10,7 +10,7 @@ import (
 
 	hc "cirello.io/HumorChecker"
 
-	"github.com/arddor/advse17/ase_api/db"
+	"github.com/arddor/advse17/lib_db"
 
 	"sync"
 

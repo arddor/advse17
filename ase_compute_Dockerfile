@@ -3,13 +3,16 @@
 FROM golang:1.8
 
 # Copy are own sources in
-ADD . /go/src/github.com/arddor/advse17/ase_compute
+ADD ./ase_compute /go/src/github.com/arddor/advse17/ase_compute
+ADD ./lib_db /go/src/github.com/arddor/advse17/lib_db
 
 # Get all the great dependencies
 RUN go get github.com/arddor/advse17/ase_compute
+RUN go get github.com/arddor/advse17/lib_db
 
 # Install sources
 RUN go install github.com/arddor/advse17/ase_compute
+RUN go install github.com/arddor/advse17/lib_db
 
 # Set the entry point
 ENTRYPOINT /go/bin/ase_compute
