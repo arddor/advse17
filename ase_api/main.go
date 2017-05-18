@@ -3,9 +3,10 @@
 package main
 
 import (
-	"ase_api/db"
 	"log"
 	"net/http"
+
+	"github.com/arddor/advse17/ase_api/db"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
