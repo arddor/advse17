@@ -10,7 +10,7 @@ import (
 
 	hc "cirello.io/HumorChecker"
 
-	"github.com/arddor/advse17/ase_api/db" // I copied this to "C:\Users\B\go\src\ase_api" to work locally -> remove ir later
+	"github.com/arddor/advse17/ase_api/db"
 
 	"sync"
 
