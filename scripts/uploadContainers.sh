@@ -13,31 +13,25 @@ COMMIT_HASH="$(git rev-parse HEAD)"
 
 
 if [[ ${PROJECT_ID} == "advse-167708" ]]; then
-    docker build -t gcr.io/${PROJECT_ID}/ase_api:git_${COMMIT_HASH} ./ase_api/
-    docker build -t gcr.io/${PROJECT_ID}/ase_compute:git_${COMMIT_HASH} ./ase_compute/
-    docker build -t gcr.io/${PROJECT_ID}/ase_twitter:git_${COMMIT_HASH} ./ase_twitter/
-    docker build -t gcr.io/${PROJECT_ID}/ase_web:git_${COMMIT_HASH} ./ase_web/
+    docker build -t eu.gcr.io/${PROJECT_ID}/ase_api:latest ./ase_api/
+    docker build -t eu.gcr.io/${PROJECT_ID}/ase_compute:latest ./ase_compute/
+    docker build -t eu.gcr.io/${PROJECT_ID}/ase_twitter:latest ./ase_twitter/
+    docker build -t eu.gcr.io/${PROJECT_ID}/ase_web:latest ./ase_web/
     
     echo "##################### IMAGES #####################"
     docker images | grep "git_"
     echo "##################### BUILD COMPLETE, PUSHING... #####################"
     
     
-    gcloud docker -- push gcr.io/${PROJECT_ID}/ase_api:git_${COMMIT_HASH}
-    gcloud docker -- push gcr.io/${PROJECT_ID}/ase_compute:git_${COMMIT_HASH}
-    gcloud docker -- push gcr.io/${PROJECT_ID}/ase_twitter:git_${COMMIT_HASH}
-    gcloud docker -- push gcr.io/${PROJECT_ID}/ase_web:git_${COMMIT_HASH}
+    gcloud docker -- push eu.gcr.io/${PROJECT_ID}/ase_api:latest
+    gcloud docker -- push eu.gcr.io/${PROJECT_ID}/ase_compute:latest
+    gcloud docker -- push eu.gcr.io/${PROJECT_ID}/ase_twitter:latest
+    gcloud docker -- push eu.gcr.io/${PROJECT_ID}/ase_web:latest
 
     
     echo "##################### PUSH COMPLETE #####################"
 
     gcloud container images list
-
-    
-    
-    
-    
-    
     
 fi
 
