@@ -8,8 +8,12 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gorilla/websocket"
 	r "gopkg.in/gorethink/gorethink.v3"
 )
+
+// TODO: Add check of origin again
+var upgrader = websocket.Upgrader{CheckOrigin: func(r *http.Request) bool { return true }}
 
 func main() {
 	s := Server{}
@@ -27,12 +31,16 @@ func (s *Server) Initialize(addr string) {
 
 	s.Router = gin.Default()
 	s.initializeRoutes()
+
 }
 
 func (s *Server) initializeRoutes() {
 	s.Router.GET("/terms", s.listTerms)
 	s.Router.POST("/terms", s.createTerm)
 	s.Router.GET("/terms/:id", s.getTerm)
+	s.Router.GET("/echo", func(c *gin.Context) {
+		wsHandler(c.Writer, c.Request)
+	})
 }
 
 func (s *Server) Run(addr string) {
@@ -81,22 +89,16 @@ func (s *Server) getTerm(c *gin.Context) {
 	c.JSON(http.StatusOK, term)
 }
 
-type Test struct {Term string `json:"term" gorethink:"term"` }
-
-/*
-func (s *Server) createTerm(c *gin.Context) {
-	var term term
-	err := c.Bind(&term)
+func wsHandler(w http.ResponseWriter, r *http.Request) {
+	c, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, err)
+		log.Print("upgrade:", err)
 		return
 	}
+	defer c.Close()
 
-	if err := term.createTerm(s.DB); err != nil {
-		c.JSON(http.StatusBadRequest, "Invalid request payload")
-		return
+	err = c.WriteMessage(websocket.TextMessage, []byte("Test"))
+	if err != nil {
+		log.Println("write:", err)
 	}
-
-	c.JSON(http.StatusCreated, term)
 }
-*/
