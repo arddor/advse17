@@ -9,7 +9,7 @@ spec:
   template:
     metadata:
       labels:
-        app: advse17
+        app: timeseries
     spec:
       containers:
       - name: rethinkdb

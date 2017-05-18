@@ -7,7 +7,7 @@ spec:
   template:
     metadata:
       labels:
-        app: advse17
+        app: twitter
     spec:
       containers:
       - name: twitter

@@ -3,10 +3,10 @@ kind: Service
 metadata:
   name: timeseries-db
   labels:
-    app: advse17
+    app: timeseries
 spec:
   type: ClusterIP
   ports:
     - port: 28015
   selector:
-    app: advse17
+    app: timeseries

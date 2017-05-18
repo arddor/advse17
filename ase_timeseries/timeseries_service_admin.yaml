@@ -3,10 +3,10 @@ kind: Service
 metadata:
   name: timeseries-admin
   labels:
-    app: advse17
+    app: timeseries
 spec:
   type: LoadBalancer
   ports:
     - port: 8080
   selector:
-    app: advse17
+    app: timeseries
