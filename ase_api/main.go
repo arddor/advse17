@@ -61,6 +61,8 @@ func (s *Server) listTerms(c *gin.Context) {
 
 func (s *Server) createTerm(c *gin.Context) {
 	var param db.Term
+	
+	// TODO: needs check if already exists
 
 	c.BindJSON(&param)
 
