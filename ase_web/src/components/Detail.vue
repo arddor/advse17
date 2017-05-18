@@ -39,6 +39,11 @@ export default {
       console.log(e)
     }
     this.loading = false
+
+    var ws = new WebSocket('ws://127.0.0.1:5002/echo')
+    ws.onopen = evt => console.log(evt)
+    ws.onclose = evt => console.log('closed')
+    ws.onmessage = evt => console.log(evt)
   },
   data () {
     return {
