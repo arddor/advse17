@@ -12,10 +12,10 @@ spec:
         app: timeseries
     spec:
       containers:
-      - image: rethinkdb:2.3.5
-        name: rethinkdb
+      - name: rethinkdb
+        image: rethinkdb:2.3.5
         ports:
         - containerPort: 8080
           name: admin
-        - containerPort: 5672
+        - containerPort: 28015
           name: db
