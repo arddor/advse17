@@ -38,6 +38,7 @@ func (s *Server) Initialize(addr string) {
 func (s *Server) initializeRoutes() {
 	s.Router.GET("/terms", s.listTerms)
 	s.Router.POST("/terms", s.createTerm)
+	// s.Router.POST("/load", s.createQueueItem)
 	s.Router.GET("/terms/:id", s.getTerm)
 	s.Router.GET("/echo", func(c *gin.Context) {
 		wsHandler(c.Writer, c.Request)
@@ -76,6 +77,11 @@ func (s *Server) createTerm(c *gin.Context) {
 
 	c.JSON(http.StatusCreated, term)
 }
+
+// func (s *Server) createQueueItem(c *gin.Context) {
+//     // TODO: implement
+// 
+// }
 
 func (s *Server) getTerm(c *gin.Context) {
 	id := c.Param("id")
