@@ -3,10 +3,10 @@ kind: Service
 metadata:
   name: queue
   labels:
-    app: queue
+    app: advse17
 spec:
   type: ClusterIP
   ports:
     - port: 5672
   selector:
-    app: queue
+    app: advse17

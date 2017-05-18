@@ -2,14 +2,12 @@ apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   name: queue-deployment
-  labels:
-    app: queue
 spec:
   replicas: 1
   template:
     metadata:
       labels:
-        app: queue
+        app: advse17
     spec:
       containers:
       - name: rabbitmq

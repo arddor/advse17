@@ -2,14 +2,12 @@ apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   name: timeseries-deployment
-  labels:
-    app: timeseries
 spec:
   replicas: 1
   template:
     metadata:
       labels:
-        app: timeseries
+        app: advse17
     spec:
       containers:
       - name: rethinkdb
