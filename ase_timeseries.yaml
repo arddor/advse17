@@ -1,21 +1,21 @@
-apiVersion: apps/v1beta1
+apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: ase_timeseries_deployment
+  name: timeseries-deployment
   labels:
-    app: ase_timeseries
+    app: timeseries
 spec:
   replicas: 1
   template:
     metadata:
       labels:
-        app: ase_timeseries
+        app: timeseries
     spec:
       containers:
       - image: rethinkdb:2.3.5
         name: rethinkdb
         ports:
-        - containerPort: 28015
-          name: db
         - containerPort: 8080
           name: admin
+        - containerPort: 5672
+          name: db

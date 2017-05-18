@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: timeseries-admin
+  labels:
+    app: timeseries
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 8080
+  selector:
+    app: timeseries
