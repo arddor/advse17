@@ -1,0 +1,16 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: compute-deployment
+  labels:
+    app: compute
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: compute
+    spec:
+      containers:
+      - name: ase_compute
+        image: eu.gcr.io/advse-167708/ase_compute
