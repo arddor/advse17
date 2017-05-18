@@ -1,0 +1,29 @@
+#
+# 
+
+
+version: "3"
+
+services:
+
+  # lg_get_tweets:
+  #   build: ./lg_get_tweets
+  #   container_name: lg_get_tweets
+  #   # ports:
+  #   #   - "5002:8000"
+  #   volumes:
+  #     - ./lg_get_tweets:/usr/src/lg_get_tweets
+  #   working_dir: /usr/src/lg_get_tweets
+  #   # links:
+  #   #   - ase_timeseries
+  #   # depends_on:
+  #   #   - ase_timeseries
+
+
+  lg_tweets:
+    image: mongo:3.4
+    container_name: lg_tweets
+    ports:
+      - "27017:27017"
+    volumes: # make sure this exists locally
+      - ./lg_tweets/mongodb:/data/db

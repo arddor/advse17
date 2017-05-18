@@ -1,0 +1,19 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: queue-deployment
+  labels:
+    app: queue
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: queue
+    spec:
+      containers:
+      - name: rabbitmq
+        image: rabbitmq:3.6.9-alpine
+        ports:
+        - containerPort: 5672
+          name: q

@@ -1,0 +1,16 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: twitter-deployment
+  labels:
+    app: twitter
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: twitter
+    spec:
+      containers:
+      - name: ase_twitter
+        image: eu.gcr.io/advse-167708/ase_twitter

@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: timeseries-db
+  labels:
+    app: timeseries
+spec:
+  type: ClusterIP
+  ports:
+    - port: 28015
+  selector:
+    app: timeseries

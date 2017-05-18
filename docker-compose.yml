@@ -1,0 +1,99 @@
+# Each image will run as a service in a container
+#
+# This file defines all the services we want to use along with details about how and where those services will run
+#
+# This file will be used by Docker Compose (version 3)
+#
+
+
+version: "3"
+
+services:
+
+  ase_api:
+    build: ase_api
+    container_name: ase_api
+    ports:
+      - "5002:8000"
+    volumes:
+      - ./ase_api:/go/src/ase_api
+    working_dir: /go/src/ase_api
+    links:
+      # register new terms
+      - ase_timeseries
+      # load generation
+      #- ase_queue
+    depends_on:
+      - ase_timeseries
+
+
+  ase_compute:
+    build: ase_compute
+    container_name: ase_compute
+    ports:
+      - "5000:8080"
+    volumes:
+      - ./ase_compute:/go/src/ase_compute
+      # Make this more elegant
+      - ./ase_api:/go/src/ase_api
+    working_dir: /go/src/ase_compute
+    links:
+      # fetch terms and update sentiment
+      - ase_timeseries
+      # fetch tweets to process
+      - ase_queue
+    depends_on:
+      - ase_timeseries
+      - ase_queue
+
+
+  ase_queue:
+    # https://hub.docker.com/_/rabbitmq/
+    image: rabbitmq:3.6.9-alpine
+    container_name: ase_queue
+    ports:
+      - "5672:5672"
+
+
+  ase_timeseries:
+    # https://hub.docker.com/_/rethinkdb/
+    image: rethinkdb:2.3.5
+    container_name: ase_timeseries
+    ports:
+      - "28015:28015"
+      - "5010:8080" # Admin interface
+    # volumes: # make sure this exists locally
+    #   - ./ase_timeseries/mongodb:/data/db
+
+
+  ase_twitter:
+    build: ase_twitter
+    container_name: ase_twitter
+    ports:
+      - "5001:8080"
+    volumes:
+      - ./ase_twitter:/go/src/ase_twitter
+      # Make this more elegant
+      - ./ase_api:/go/src/ase_api
+    working_dir: /go/src/ase_twitter
+    links:
+      # fetch terms
+      - ase_timeseries
+      # add tweets
+      - ase_queue
+    depends_on:
+      - ase_timeseries
+      - ase_queue
+
+
+  ase_web:
+    build: ase_web
+    container_name: ase_web
+    ports:
+      - "5050:8080"
+    volumes:
+      - ./ase_web:/usr/src/app
+    working_dir: /usr/src/app
+    depends_on:
+      # API calls
+      - ase_timeseries
