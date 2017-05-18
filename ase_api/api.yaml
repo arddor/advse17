@@ -12,8 +12,8 @@ spec:
         app: api
     spec:
       containers:
-      - name: api
-        image: eu.gcr.io/advse-167708/api
+      - name: ase_api
+        image: eu.gcr.io/advse-167708/ase_api
         ports:
         - containerPort: 8000
           name: http
