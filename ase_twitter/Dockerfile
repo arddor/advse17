@@ -11,8 +11,5 @@ RUN go get github.com/arddor/advse17/ase_twitter
 # Install sources
 RUN go install github.com/arddor/advse17/ase_twitter
 
-# Expose the application on port 8080
-EXPOSE 8080
-
 # Set the entry point
 ENTRYPOINT /go/bin/ase_twitter
