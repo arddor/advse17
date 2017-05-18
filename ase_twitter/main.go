@@ -66,7 +66,7 @@ func connectToMQ() *amqp.Connection {
 	for {
 		var conn *amqp.Connection
 		var err error
-		conn, err = amqp.Dial("amqp://ase_queue:5672")
+		conn, err = amqp.Dial("amqp://queue:5672")
 		if err == nil {
 			return conn
 		}
@@ -135,7 +135,7 @@ func main() {
 
 	client := twitter.NewClient(httpClient)
 
-	db.Initialize("ase_timeseries:28015")
+	db.Initialize("timeseries-db:28015")
 
 	// Convenience Demux demultiplexed stream messages
 	demux := twitter.NewSwitchDemux()

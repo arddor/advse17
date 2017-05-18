@@ -73,7 +73,7 @@ func computeSentiment(sentence string) float32 {
 func initDB() {
 	printLog("DB", "Starting ...")
 
-	db.Initialize("ase_timeseries:28015")
+	db.Initialize("timeseries-db:28015")
 
 	_terms, _ = db.GetTerms(false)
 	if _terms == nil {
@@ -139,7 +139,7 @@ func startWorker() {
 	printLog("Worker", "Starting ...")
 	for {
 		var err error
-		conn, err = amqp.Dial("amqp://ase_queue:5672")
+		conn, err = amqp.Dial("amqp://queue:5672")
 		if err == nil {
 			break
 		} else {
