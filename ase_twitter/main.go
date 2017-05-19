@@ -62,13 +62,23 @@ func removeTrackingParam(param string) {
 	trackingParams = trackingParams[:k] // set slice len to remaining elements
 }
 
-func connectToMQ() *amqp.Connection {
+func connectToMQ() (*amqp.Connection, *amqp.Channel) {
 	for {
 		var conn *amqp.Connection
 		var err error
 		conn, err = amqp.Dial("amqp://queue:5672")
 		if err == nil {
-			return conn
+			for {
+				// declare a channel
+				channel, err := conn.Channel()
+				if err == nil{
+				// TODO: are those next 2 lines neccessary?
+				defer conn.Close()
+				defer channel.Close()
+				return conn, channel
+				}
+			log.Println("Error with channel creation: ", err)
+			}
 		}
 		// else, reconnect after timeout
 		time.Sleep(1000 * time.Millisecond)
@@ -101,24 +111,27 @@ func main() {
 
 	var err error
 	var conn *amqp.Connection
+	var ch *amqp.Channel
 
 	connError := make(chan *amqp.Error)
 	go func() {
 		err := <-connError
-		log.Println("reconnect: " + err.Error())
-		conn = connectToMQ()
+		log.Println("reconnect: ", err)
+		conn, ch = connectToMQ()
+		// TODO: is this neccessary?
+		//conn.NotifyClose(connError)
 	}()
 
 	// connect to RabbitMQ server
-	conn = connectToMQ()
+	conn, ch = connectToMQ()
 	failOnError(err, "Failed to connect to RabbitMQ")
 	conn.NotifyClose(connError)
-
-	// create a channel
-	ch, err := conn.Channel()
-	failOnError(err, "Failed to open a channel")
-	defer conn.Close()
-
+	
+	if(ch == nil){
+		ch, err = conn.Channel()
+		failOnError(err, "Failed to open a channel")
+	}
+	
 	// declare a queue for us to send to
 	q, err := ch.QueueDeclare(
 		"tweet", // name
@@ -128,8 +141,7 @@ func main() {
 		false,   // no-wait
 		nil,     // arguments
 	)
-	failOnError(err, "Failed to declare a queue")
-	defer ch.Close()
+	log.Println("Failed to declare a queue: ", err)
 
 	var stream *twitter.Stream
 
