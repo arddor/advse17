@@ -14,6 +14,7 @@ services:
     build:
       context: ./
       dockerfile: ase_api_Dockerfile
+    container_name: api
     ports:
       - "8000:8000"
     links:
@@ -25,9 +26,21 @@ services:
     build:
       context: ./
       dockerfile: ase_compute_Dockerfile
+    container_name: compute
     links:
       - timeseries-db # fetch terms and update sentiment
       - queue # fetch tweets to process
+
+
+#  load:
+#    build:
+#      context: ./
+#      dockerfile: ase_api_Dockerfile
+#    ports:
+#      - "8000:8000"
+#    links:
+#      - timeseries-db # register new terms
+#      - queue # load generation
 
 
   queue:
@@ -41,6 +54,7 @@ services:
   timeseries-db:
     # https://hub.docker.com/_/rethinkdb/
     image: rethinkdb:2.3.5
+    container_name: timeseries-db
     ports:
       - "28015:28015"
       - "8080:8080" # Admin interface
@@ -50,14 +64,15 @@ services:
     build:
       context: ./
       dockerfile: ase_twitter_Dockerfile
+    container_name: twitter
     links:
       - timeseries-db # fetch terms
       - queue # add tweets
 
 
-  web:
-    build: ase_web
-    ports:
-      - "80:8080"
-    links:
-      - timeseries-db # API calls
+#  web:
+#    build: ase_web
+#    ports:
+#      - "80:8080"
+#    links:
+#      - timeseries-db # API calls
