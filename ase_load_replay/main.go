@@ -74,25 +74,27 @@ func main() {
 	// loop through all items
 	
 	result := Tweet{}
-		
-	iter := coll.Find(nil).Batch(10000).Iter()
-	for iter.Next(&result) {		
-		err = ch.Publish(
-		  "",		// exchange
-		  "tweet",	// routing key
-		  false,		// mandatory
-		  false,		// immediate
-		  amqp.Publishing {
-			DeliveryMode: amqp.Persistent,
-			ContentType:  "text/plain",
-			MessageId:    time.Now().Format("Mon Jan 02 15:04:05 +0000 2006"),
-			Body:         []byte(result.Text),
-		  })
-		failOnError(err, "Failed to publish a message")
-	}
 	
-	if err = iter.Close(); err != nil {
-		failOnError(err, "Failed to close iterator")
+	for {
+		iter := coll.Find(nil).Batch(10000).Iter()
+		for iter.Next(&result) {		
+			err = ch.Publish(
+			  "",		// exchange
+			  "tweet",	// routing key
+			  false,		// mandatory
+			  false,		// immediate
+			  amqp.Publishing {
+				DeliveryMode: amqp.Persistent,
+				ContentType:  "text/plain",
+				MessageId:    time.Now().Format("Mon Jan 02 15:04:05 +0000 2006"),
+				Body:         []byte(result.Text),
+			  })
+			failOnError(err, "Failed to publish a message")
+		}
+		
+		if err = iter.Close(); err != nil {
+			failOnError(err, "Failed to close iterator")
+		}
 	}
 	
 	fmt.Println("Exiting replay...")
