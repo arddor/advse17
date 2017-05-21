@@ -92,9 +92,8 @@ func main() {
 			failOnError(err, "Failed to publish a message")
 		}
 		
-		if err = iter.Close(); err != nil {
-			failOnError(err, "Failed to close iterator")
-		}
+		err = iter.Close()
+		failOnError(err, "Failed to close iterator")
 	}
 	
 	fmt.Println("Exiting replay...")
