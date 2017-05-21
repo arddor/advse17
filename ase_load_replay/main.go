@@ -85,7 +85,7 @@ func main() {
 		  amqp.Publishing {
 			DeliveryMode: amqp.Persistent,
 			ContentType:  "text/plain",
-			MessageId:    time.Now().Format("Mon Jan 02 15:04:05 +0000 2006").String(),
+			MessageId:    time.Now().Format("Mon Jan 02 15:04:05 +0000 2006"),
 			Body:         []byte(result.Text),
 		  })
 		failOnError(err, "Failed to publish a message")
