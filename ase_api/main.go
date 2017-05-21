@@ -5,7 +5,6 @@ package main
 import (
 	"log"
 	"net/http"
-	"time"
 
 	"github.com/arddor/advse17/lib_db"
 
@@ -33,8 +32,6 @@ func (s *Server) Initialize(addr string) {
 
 	s.Router = gin.Default()
 	s.initializeRoutes()
-	
-	initializeAMQPConnection()
 }
 
 func (s *Server) initializeRoutes() {
