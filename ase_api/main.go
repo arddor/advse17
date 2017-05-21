@@ -12,7 +12,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	r "gopkg.in/gorethink/gorethink.v3"
-	"github.com/streadway/amqp"
 )
 
 // TODO: Add check of origin again
@@ -80,38 +79,6 @@ func (s *Server) createTerm(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, term)
-}
-
- func (s *Server) createQueueItem(c *gin.Context) {
-     // TODO: test
-	var item string
-	
-	c.BindJSON(&item)
-	
-	if item == "" {
-		c.JSON(http.StatusBadRequest, "Item was empty ")
-		return
-	}
-	
-	body := item
-	// TODO: if you want to have a different or specific format, you need to use the .Format("...") function
-	timestamp := time.Now().String()
-	
-	err := amqpChannel.Publish(
-			"",     // exchange
-			"tweet", // routing key
-			false,  // mandatory
-			false,  // immediate
-			amqp.Publishing{
-				DeliveryMode: amqp.Persistent,
-				ContentType:  "text/plain",
-				MessageId:    timestamp,
-				Body:         []byte(body),
-			})
-	if err != nil {
-		log.Println("Error while publishing tweet: ", err)
-	}
-	c.JSON(http.StatusCreated, item)
 }
 
 func (s *Server) getTerm(c *gin.Context) {
