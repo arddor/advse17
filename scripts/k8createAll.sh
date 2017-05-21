@@ -23,6 +23,19 @@ kubectl create -f ./ase_compute/compute.yaml;
 
 
 
+##################### replay
+
+kubectl create -f ./ase_load_replay/replay.yaml;
+
+
+
+##################### tweets
+
+kubectl create -f ./ase_load_tweets/tweets.yaml;
+kubectl create -f ./ase_load_tweets/tweets_service.yaml;
+
+
+
 ##################### queue
 
 kubectl create -f ./ase_queue/queue.yaml;
