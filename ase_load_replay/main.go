@@ -4,9 +4,11 @@ package main
 
 import (
 	"fmt"
+	"time"
 	
+	// https://labix.org/mgo
 	"gopkg.in/mgo.v2"
-	"gopkg.in/mgo.v2/bson"
+	//"gopkg.in/mgo.v2/bson"
 	
 	"github.com/streadway/amqp"
 )
@@ -21,7 +23,7 @@ func main() {
 	
 	// mongo
 	fmt.Println("Connecting to mongodb...")
-	session, err := mgo.Dial("mongodb://tweets:27017") // docker
+	session, err := mgo.Dial("mongodb://tweets:27017")
 	
 	if err != nil {
 		panic(err)
@@ -47,11 +49,11 @@ func main() {
 				Body:         []byte(body),
 			})
 	if err != nil {
-		log.Println("Error while publishing tweet: ", err)
+		fmt.Println("Error while publishing tweet: ", err)
 	}
 
 
-
+	fmt.Println("Exiting replay...")
 }
 
 func initializeAMQPConnection() {
@@ -62,7 +64,7 @@ func initializeAMQPConnection() {
 	connError := make(chan *amqp.Error)
 	go func() {
 		err := <-connError
-		log.Println("reconnect: ", err)
+		fmt.Println("reconnect: ", err)
 		conn, ch = connectToMQ()
 		//TODO: is this neccessary?
 		//conn.NotifyClose(connError)
@@ -75,7 +77,7 @@ func initializeAMQPConnection() {
 
 	if(amqpChannel == nil){
 		amqpChannel, err = conn.Channel()
-		log.Println("Failed to open a channel: ", err)
+		fmt.Println("Failed to open a channel: ", err)
 	}
 
 	q, err := amqpChannel.QueueDeclare(
@@ -87,9 +89,9 @@ func initializeAMQPConnection() {
 		nil,     // arguments
 	)
 	if err != nil {
-		log.Println("Error while creating a Queue: ", err)
+		fmt.Println("Error while creating a Queue: ", err)
 	}
-	log.Println("Declared queue " + q.Name)
+	fmt.Println("Declared queue " + q.Name)
 }
 
 func connectToMQ() (*amqp.Connection, *amqp.Channel) {
@@ -107,12 +109,12 @@ func connectToMQ() (*amqp.Connection, *amqp.Channel) {
 
 					return conn, channel
 				}
-				log.Println("Error with channel creation: ", err)
+				fmt.Println("Error with channel creation: ", err)
 			}
 		}
 		// else, reconnect after timeout
 		time.Sleep(1000 * time.Millisecond)
-		log.Println("Reconnect to AMQP...")
+		fmt.Println("Reconnect to AMQP...")
 	}
 }
 
