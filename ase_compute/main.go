@@ -111,11 +111,11 @@ func processTweet(timestamp string, tweet string) bool {
 		if strings.Contains(strings.ToLower(tweet), strings.ToLower(term.Term)) {
 			_mutex.Unlock()
 			printLog("ProcessTweet", "Tweet contains "+term.Term)
-			fmt.Print("'" + timestamp + "' converted to: ")
+			//fmt.Print("'" + timestamp + "' converted to: ")
 			// layout := "2006-01-02T15:04:05.000Z" // Example
 			layout := "Mon Jan 02 15:04:05 +0000 2006"
 			t, err := time.Parse(layout, timestamp)
-			fmt.Print("'" + t.String() + "'\n")
+			//fmt.Print("'" + t.String() + "'\n")
 			if err != nil {
 				printLog("ProcessTweet", "Could not convert timestamp!")
 				return false
@@ -180,7 +180,7 @@ func startWorker() {
 
 	go func() {
 		for d := range msgs {
-			printLog("Worker", "Received a tweet: "+string(d.Body))
+			//printLog("Worker", "Received a tweet: "+string(d.Body))
 			if processTweet(d.MessageId, string(d.Body)) {
 				d.Ack(false)
 			} else {
