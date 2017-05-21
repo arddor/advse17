@@ -1,0 +1,14 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: replay-deployment
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: replay
+    spec:
+      containers:
+      - name: replay
+        image: eu.gcr.io/advse-167708/ase_load_replay
