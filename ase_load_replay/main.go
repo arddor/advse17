@@ -77,10 +77,11 @@ func main() {
 	
 	for {
 		iter := coll.Find(nil).Batch(10000).Iter()
-		for iter.Next(&result) {		
+		for iter.Next(&result) {
+			fmt.Println("Replaying: " + result.Text)
 			err = ch.Publish(
 			  "",		// exchange
-			  "tweet",	// routing key
+			  q.Name,	// routing key
 			  false,		// mandatory
 			  false,		// immediate
 			  amqp.Publishing {
