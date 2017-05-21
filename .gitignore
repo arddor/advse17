@@ -30,6 +30,6 @@ ase_*/ase_*
 ase_compute/debug
 ase_timeseries/mongodb/*
 
-/Load Generation/lg_tweets/mongodb
-/Load Generation/lg_mine_tweets/node_modules/
+/load_mine_tweets/node_modules/
 /todo.md
+/ase_load_tweets/mongodb

@@ -20,8 +20,8 @@ services:
     links:
       - timeseries-db # register new terms
       - queue # load generation
-
-
+  
+  
   compute:
     build:
       context: ./
@@ -30,27 +30,27 @@ services:
     links:
       - timeseries-db # fetch terms and update sentiment
       - queue # fetch tweets to process
-
-
-#  load:
-#    build:
-#      context: ./
-#      dockerfile: ase_api_Dockerfile
-#    ports:
-#      - "8000:8000"
-#    links:
-#      - timeseries-db # register new terms
-#      - queue # load generation
-
-
+  
+  
+  load:
+    build:
+      context: ./
+      dockerfile: ase_api_Dockerfile
+    ports:
+      - "8000:8000"
+    links:
+      - timeseries-db # register new terms
+      - queue # load generation
+  
+  
   queue:
     # https://hub.docker.com/_/rabbitmq/
     image: rabbitmq:3.6.9-alpine
     container_name: queue
     ports:
       - "5672:5672"
-
-
+  
+  
   timeseries-db:
     # https://hub.docker.com/_/rethinkdb/
     image: rethinkdb:2.3.5
@@ -58,6 +58,14 @@ services:
     ports:
       - "28015:28015"
       - "8080:8080" # Admin interface
+
+
+  tweets:
+    build: ./ase_load_tweets/
+    image: mongo:3.4
+    container_name: tweets
+    ports:
+      - "27017:27017"
 
 
   twitter:
