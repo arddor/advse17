@@ -35,6 +35,7 @@ export default {
       let {data} = await axios.get(`api/terms/${id}`)
       this.term = data.term
       this.chart = this.chartData(data.data)
+      // this.chartData(data.data)
     } catch (e) {
       console.log(e)
     }
@@ -54,19 +55,38 @@ export default {
   },
   methods: {
     chartData (data) {
+      let love = {x: [], y: [], type: 'bar', name: 'love'}
       let positive = {x: [], y: [], type: 'bar', name: 'positive'}
       let negative = {x: [], y: [], type: 'bar', name: 'negative'}
+      let hate = {x: [], y: [], type: 'bar', name: 'hate'}
 
       data.forEach(item => {
-        if (item.sentiment === 1) {
+        if (item.sentiment > 0.75) {
+          love.x.push(new Date(item.time))
+          love.y.push(item.sentiment)
+        } else if (item.sentiment > 0.5) {
           positive.x.push(new Date(item.time))
-          positive.y.push(1)
-        } else if (item.sentiment === 0) {
+          positive.y.push(item.sentiment)
+        } else if (item.sentiment > 0.25) {
           negative.x.push(new Date(item.time))
-          negative.y.push(-1)
+          negative.y.push(item.sentiment - 1)
+        } else if (item.sentiment < 0.25) {
+          hate.x.push(new Date(item.time))
+          hate.y.push(item.sentiment - 1)
         }
       })
-      return [positive, negative]
+      return [love, positive, negative, hate]
+    },
+    testChart (data) {
+      let x = []
+      let y = []
+
+      data.forEach(item => {
+        x.push(new Date(item.time))
+        y.push(item.sentiment)
+      })
+
+      return [{x, y, type: 'bar'}]
     }
   }
 }

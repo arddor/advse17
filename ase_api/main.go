@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/arddor/advse17/lib_db"
+	"github.com/gin-contrib/static"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
@@ -35,9 +36,13 @@ func (s *Server) Initialize(addr string) {
 }
 
 func (s *Server) initializeRoutes() {
-	s.Router.GET("/terms", s.listTerms)
-	s.Router.POST("/terms", s.createTerm)
-	s.Router.GET("/terms/:id", s.getTerm)
+	s.Router.Use(static.Serve("/", static.LocalFile("public", true)))
+	api := s.Router.Group("/api")
+	{
+		api.GET("/terms", s.listTerms)
+		api.POST("/terms", s.createTerm)
+		api.GET("/terms/:id", s.getTerm)
+	}
 	s.Router.GET("/echo", func(c *gin.Context) {
 		wsHandler(c.Writer, c.Request)
 	})
@@ -59,7 +64,7 @@ func (s *Server) listTerms(c *gin.Context) {
 
 func (s *Server) createTerm(c *gin.Context) {
 	var param db.Term
-	
+
 	// TODO: needs check if already exists
 
 	c.BindJSON(&param)

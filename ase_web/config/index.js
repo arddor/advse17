@@ -4,8 +4,8 @@ var path = require('path')
 module.exports = {
   build: {
     env: require('./prod.env'),
-    index: path.resolve(__dirname, '../dist/index.html'),
-    assetsRoot: path.resolve(__dirname, '../dist'),
+    index: path.resolve(__dirname, '../../ase_api/public/index.html'),
+    assetsRoot: path.resolve(__dirname, '../../ase_api/public'),
     assetsSubDirectory: 'static',
     assetsPublicPath: '/',
     productionSourceMap: true,
@@ -29,7 +29,7 @@ module.exports = {
     assetsPublicPath: '/',
     proxyTable: {
       '/api/**': {
-        target: 'http://127.0.0.1:5002',
+        target: 'http://35.189.212.130:8000',
         // secure: false,
         // changeOrigin: true,
         pathRewrite: {'^/api': ''}
