@@ -1,6 +1,11 @@
-#FROM golang:1.8-alpine
-# Can't use alpine, need git
-FROM golang:1.8
+FROM golang:1.8-alpine
+
+# Install git
+RUN apk add --update \
+        git \
+    ; \
+    export PATH=/usr/bin/git:"${PATH}"; \
+    rm -rf /var/cache/apk/*
 
 # Copy are own sources in
 ADD ./ase_compute /go/src/github.com/arddor/advse17/ase_compute
@@ -13,6 +18,9 @@ RUN go get github.com/arddor/advse17/lib_db
 # Install sources
 RUN go install github.com/arddor/advse17/ase_compute
 RUN go install github.com/arddor/advse17/lib_db
+
+# Remove git
+RUN apk del git
 
 # Set the entry point
 ENTRYPOINT /go/bin/ase_compute

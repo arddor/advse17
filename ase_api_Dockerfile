@@ -1,6 +1,11 @@
-#FROM golang:1.8-alpine
-# Can't use alpine, need git
-FROM golang:1.8
+FROM golang:1.8-alpine
+
+# Install git
+RUN apk add --update \
+        git \
+    ; \
+    export PATH=/usr/bin/git:"${PATH}"; \
+    rm -rf /var/cache/apk/*
 
 # Copy are own sources in
 ADD ./ase_api /go/src/github.com/arddor/advse17/ase_api
@@ -16,6 +21,9 @@ RUN go install github.com/arddor/advse17/lib_db
 
 # Expose the application on port 8000
 EXPOSE 8000
+
+# Remove git
+RUN apk del git
 
 # Set the entry point
 ENTRYPOINT /go/bin/ase_api
