@@ -36,7 +36,7 @@ func (s *Server) Initialize(addr string) {
 }
 
 func (s *Server) initializeRoutes() {
-	s.Router.Use(static.Serve("/", static.LocalFile("public", true)))
+	s.Router.Use(static.Serve("/", static.LocalFile("/public", true)))
 	api := s.Router.Group("/api")
 	{
 		api.GET("/terms", s.listTerms)

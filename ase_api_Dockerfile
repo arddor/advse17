@@ -10,6 +10,7 @@ RUN apk add --update \
 # Copy are own sources in
 ADD ./ase_api /go/src/github.com/arddor/advse17/ase_api
 ADD ./lib_db /go/src/github.com/arddor/advse17/lib_db
+ADD ./ase_api/public /public
 
 # Get all the great dependencies
 RUN go get github.com/arddor/advse17/ase_api
