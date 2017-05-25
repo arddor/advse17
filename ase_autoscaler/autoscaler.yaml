@@ -23,7 +23,7 @@ spec:
         - name: RABBITMQ_QUEUE
           value: tweet
         - name: KUBERNETES_RABBITMQ_SERVICE_NAME
-          value: queue-broker
+          value: queue
         resources:
           requests:
             cpu: 100m
