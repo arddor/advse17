@@ -17,8 +17,9 @@ if [[ ${PROJECT_ID} == "advse-167708" ]]; then
     docker build -t eu.gcr.io/${PROJECT_ID}/ase_compute:latest -f ase_compute_Dockerfile .
     docker build -t eu.gcr.io/${PROJECT_ID}/ase_load_replay:latest ./ase_load_replay/
     docker build -t eu.gcr.io/${PROJECT_ID}/ase_load_tweets:latest ./ase_load_tweets/
+    docker build -t eu.gcr.io/${PROJECT_ID}/ase_timeseries:latest ./ase_timeseries/
     docker build -t eu.gcr.io/${PROJECT_ID}/ase_twitter:latest -f ase_twitter_Dockerfile .
-    docker build -t eu.gcr.io/${PROJECT_ID}/ase_web:latest ./ase_web/
+    #docker build -t eu.gcr.io/${PROJECT_ID}/ase_web:latest ./ase_web/
     
     echo "##################### IMAGES #####################"
     docker images | grep "ase_"
@@ -29,8 +30,9 @@ if [[ ${PROJECT_ID} == "advse-167708" ]]; then
     gcloud docker -- push eu.gcr.io/${PROJECT_ID}/ase_compute:latest
     gcloud docker -- push eu.gcr.io/${PROJECT_ID}/ase_load_replay:latest
     gcloud docker -- push eu.gcr.io/${PROJECT_ID}/ase_load_tweets:latest
+    gcloud docker -- push eu.gcr.io/${PROJECT_ID}/ase_timeseries:latest
     gcloud docker -- push eu.gcr.io/${PROJECT_ID}/ase_twitter:latest
-    gcloud docker -- push eu.gcr.io/${PROJECT_ID}/ase_web:latest
+    #gcloud docker -- push eu.gcr.io/${PROJECT_ID}/ase_web:latest
 
     
     echo "##################### PUSH COMPLETE #####################"

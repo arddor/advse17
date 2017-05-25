@@ -12,8 +12,8 @@ spec:
         app: timeseries
     spec:
       containers:
-      - name: rethinkdb
-        image: rethinkdb:2.3.5
+      - name: timeseries
+        image: eu.gcr.io/advse-167708/ase_timeseries
         resources:
           requests:
             memory: "2048Mi"
