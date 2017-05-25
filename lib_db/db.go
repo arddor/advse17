@@ -151,7 +151,7 @@ func OnAddSentiment(fn func(value Sentiment)) {
 
 func OnAddTerm(fn func(term Term)) {
 	res, err := r.Table("items").Pluck("term").Changes().Map(func(doc r.Term) interface{} {
-		return doc.Field("new_val").Field("data").Nth(-1)
+		return doc.Field("new_val")
 	}).Run(session)
 
 	if err != nil {
