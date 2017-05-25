@@ -17,18 +17,6 @@ kubectl delete -f ./ase_api/api_service.yaml;
 
 
 
-##################### compute
-
-kubectl delete -f ./ase_compute/compute.yaml;
-
-
-
-##################### replay
-
-kubectl delete -f ./ase_load_replay/replay.yaml;
-
-
-
 ##################### tweets
 
 kubectl delete -f ./ase_load_tweets/tweets.yaml;
