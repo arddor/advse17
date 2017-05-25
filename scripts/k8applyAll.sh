@@ -51,6 +51,19 @@ kubectl apply -f ./ase_timeseries/timeseries_service_db.yaml
 
 
 
+############################## autoscaler
+
+kubectl apply -f ./ase_autoscaler/autoscaler.yaml
+
+
+
+############################## queue_broker
+
+kubectl apply -f ./ase_queue_broker/queue_broker.yaml
+kubectl apply -f ./ase_queue_broker/queue_broker_service.yaml
+
+
+
 ##################### twitter
 
 kubectl apply -f ./ase_twitter/twitter.yaml;

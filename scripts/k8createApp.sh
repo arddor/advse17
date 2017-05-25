@@ -38,6 +38,19 @@ kubectl create -f ./ase_timeseries/timeseries_service_db.yaml
 
 
 
+############################## autoscaler
+
+kubectl create -f ./ase_autoscaler/autoscaler.yaml
+
+
+
+############################## queue_broker
+
+kubectl create -f ./ase_queue_broker/queue_broker.yaml
+kubectl create -f ./ase_queue_broker/queue_broker_service.yaml
+
+
+
 ##################### twitter
 
 kubectl create -f ./ase_twitter/twitter.yaml;

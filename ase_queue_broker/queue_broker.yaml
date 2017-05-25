@@ -1,0 +1,30 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: queue-broker-deployment
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: queue-broker
+    spec:
+      containers:
+      - name: rabbitmq
+        image: rabbitmq:3-management
+        imagePullPolicy: Always
+        env:
+        - name: RABBITMQ_HIPE_COMPILE
+          value: "1"
+        resources:
+          requests:
+            cpu: 200m
+            memory: 200Mi
+          limits:
+            cpu: 500m
+            memory: 500Mi
+        ports:
+        - containerPort: 5672
+          hostPort: 5672
+        - containerPort: 15672
+          hostPort: 15672
