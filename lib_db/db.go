@@ -149,6 +149,22 @@ func OnAddSentiment(fn func(value Sentiment)) {
 	}
 }
 
+func OnAddTerm(fn func(term Term)) {
+	res, err := r.Table("items").Pluck("term").Changes().Map(func(doc r.Term) interface{} {
+		return doc.Field("new_val").Field("data").Nth(-1)
+	}).Run(session)
+
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	var value Term
+
+	for res.Next(&value) {
+		fn(value)
+	}
+}
+
 func OnChangeNoData(fn func(value map[string]*Term)) {
 	res, err := r.Table("items").Without("data").Changes().Run(session)
 
