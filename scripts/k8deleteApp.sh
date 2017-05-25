@@ -17,10 +17,9 @@ kubectl delete -f ./ase_api/api_service.yaml;
 
 
 
-##################### tweets
+##################### compute
 
-kubectl delete -f ./ase_load_tweets/tweets.yaml;
-kubectl delete -f ./ase_load_tweets/tweets_service.yaml;
+kubectl delete -f ./ase_compute/compute.yaml;
 
 
 
@@ -45,7 +44,7 @@ kubectl delete -f ./ase_autoscaler/autoscaler.yaml
 
 
 
-############################## queue_broker
+############################## queue-broker
 
 kubectl delete -f ./ase_queue_broker/queue_broker.yaml
 kubectl delete -f ./ase_queue_broker/queue_broker_service.yaml

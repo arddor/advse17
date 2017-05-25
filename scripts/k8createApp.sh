@@ -44,7 +44,7 @@ kubectl create -f ./ase_autoscaler/autoscaler.yaml
 
 
 
-############################## queue_broker
+############################## queue-broker
 
 kubectl create -f ./ase_queue_broker/queue_broker.yaml
 kubectl create -f ./ase_queue_broker/queue_broker_service.yaml
