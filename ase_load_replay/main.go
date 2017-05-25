@@ -91,6 +91,8 @@ func main() {
 				Body:         []byte(result.Text),
 			  })
 			failOnError(err, "Failed to publish a message")
+			// add sleep, we can always spin up more generators
+			time.Sleep(100 * time.Millisecond)
 		}
 		
 		err = iter.Close()
