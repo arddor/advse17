@@ -20,7 +20,7 @@ var upgrader = websocket.Upgrader{CheckOrigin: func(r *http.Request) bool { retu
 
 func main() {
 	s := Server{}
-	s.Initialize(":28015")
+	s.Initialize("timeseries-db:28015")
 	s.Run(":8000")
 }
 
