@@ -5,6 +5,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/arddor/advse17/lib_db"
 	"github.com/gin-contrib/static"
@@ -19,7 +20,7 @@ var upgrader = websocket.Upgrader{CheckOrigin: func(r *http.Request) bool { retu
 
 func main() {
 	s := Server{}
-	s.Initialize("timeseries-db:28015")
+	s.Initialize(":28015")
 	s.Run(":8000")
 }
 
@@ -85,7 +86,14 @@ func (s *Server) createTerm(c *gin.Context) {
 
 func (s *Server) getTerm(c *gin.Context) {
 	id := c.Param("id")
-	term, err := db.GetTerm(id, true)
+	seconds, _ := strconv.Atoi(c.Query("seconds"))
+
+	// set 1h if missing
+	if seconds <= 0 {
+		seconds = 3600
+	}
+
+	term, err := db.GetTerm(id, seconds)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": err,

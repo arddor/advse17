@@ -70,12 +70,16 @@ func GetTerms(includeSentimentData bool) ([]Term, error) {
 	return terms, nil
 }
 
-func GetTerm(id string, includeSentimentData bool) (*Term, error) {
+func GetTerm(id string, seconds int) (*Term, error) {
 	var cursor *r.Cursor
 	var err error
 
-	if includeSentimentData {
-		cursor, err = r.Table("items").Get(id).Run(session)
+	if seconds > 0 {
+		cursor, err = r.Table("items").Get(id).Merge(map[string]interface{}{
+			"data": r.Row.Field("data").Filter(func(item r.Term) r.Term {
+				return item.Field("timestamp").Gt(r.Now().Sub(seconds))
+			}),
+		}).Run(session)
 	} else {
 		cursor, err = r.Table("items").Get(id).Without("data").Run(session)
 	}
