@@ -18,11 +18,11 @@ spec:
           value: "1"
         resources:
           requests:
-            memory: "1024Mi"
-            cpu: "200m"
-          limits:
             memory: "4096Mi"
-            cpu: "400m"
+            cpu: "500m"
+          limits:
+            memory: "8192Mi"
+            cpu: "1000m"
         ports:
         - containerPort: 5672
           hostPort: 5672
