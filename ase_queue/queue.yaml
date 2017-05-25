@@ -12,12 +12,13 @@ spec:
       containers:
       - name: rabbitmq
         image: rabbitmq:3.6.9-alpine
-        requests:
-          memory: "64Mi"
-          cpu: "100m"
-        limits:
-          memory: "128Mi"
-          cpu: "250m"
+        resources:
+          requests:
+            memory: "1024Mi"
+            cpu: "200m"
+          limits:
+            memory: "4096Mi"
+            cpu: "400m"
         ports:
         - containerPort: 5672
           name: q
