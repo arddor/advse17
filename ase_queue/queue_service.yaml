@@ -5,7 +5,7 @@ metadata:
   labels:
     app: queue
 spec:
-  type: NodePort
+  type: LoadBalancer
   ports:
   - port: 5672
     name: main-port
