@@ -22,7 +22,7 @@ var upgrader = &websocket.Upgrader{ReadBufferSize: 1024, WriteBufferSize: 1024, 
 func main() {
 	s := Server{}
 	s.Initialize("timeseries-db:28015")
-	s.Run(":8000")
+	s.Run(":80")
 }
 
 type Server struct {
