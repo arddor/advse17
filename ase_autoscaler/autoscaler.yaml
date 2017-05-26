@@ -25,7 +25,7 @@ spec:
         - name: RABBITMQ_HOST
           value: queue
         - name: KUBERNETES_SERVICE_URL
-          value: "https://10.99.240.1:443"
+          value: "https://kubernetes:443"
         resources:
           requests:
             cpu: 100m
