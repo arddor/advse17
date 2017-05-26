@@ -33,7 +33,7 @@ kubectl apply -f ./ase_queue/queue_service.yaml;
 ############################## timeseries
 
 kubectl apply -f ./ase_timeseries/timeseries.yaml
-kubectl apply -f ./ase_timeseries/timeseries_service_admin.yaml
+#kubectl apply -f ./ase_timeseries/timeseries_service_admin.yaml
 kubectl apply -f ./ase_timeseries/timeseries_service_db.yaml
 
 

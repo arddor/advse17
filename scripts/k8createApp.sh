@@ -33,7 +33,7 @@ kubectl create --save-config -f ./ase_queue/queue_service.yaml;
 ############################## timeseries
 
 kubectl create --save-config -f ./ase_timeseries/timeseries.yaml
-kubectl create --save-config -f ./ase_timeseries/timeseries_service_admin.yaml
+#kubectl create --save-config -f ./ase_timeseries/timeseries_service_admin.yaml
 kubectl create --save-config -f ./ase_timeseries/timeseries_service_db.yaml
 
 
