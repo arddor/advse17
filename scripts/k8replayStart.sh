@@ -15,10 +15,3 @@
 kubectl create --save-config -f ./ase_load_replay/replay.yaml;
 
 
-
-##################### tweets
-
-kubectl create --save-config -f ./ase_load_tweets/tweets.yaml;
-kubectl create --save-config -f ./ase_load_tweets/tweets_service.yaml;
-
-
