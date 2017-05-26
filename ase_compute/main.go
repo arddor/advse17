@@ -102,6 +102,9 @@ func initDB() {
 			}
 			_mutex.Unlock()
 		})
+		printLog("DB", "Connection to DB lost")
+		time.Sleep(3000 * time.Millisecond)
+		initDB()
 	}()
 }
 
