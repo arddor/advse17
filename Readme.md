@@ -32,6 +32,10 @@ After startup our api service will get an EXTERNAL-IP where our UI runs on Port 
 
 ```./scripts/k8status.sh```
 
+Other information about the cluster can be found using.
+
+```kubectl proxy```
+
 
 ## Load Generation
 
