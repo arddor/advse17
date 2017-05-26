@@ -60,7 +60,8 @@ export default {
     this.loadTerm()
 
     let {port} = window.location
-    this.ws = new window.WebSocket(`ws://0.0.0.0:${port}/ws/changes/${id}`)
+    let {host} = window.location
+    this.ws = new window.WebSocket(`ws://${host}:${port}/ws/changes/${id}`)
     this.ws.onopen = evt => console.log('opened websocket')
     this.ws.onclose = evt => console.log('closed')
     this.ws.onmessage = evt => {
