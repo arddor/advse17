@@ -16,10 +16,10 @@ spec:
         image: eu.gcr.io/advse-167708/ase_timeseries
         resources:
           requests:
-            memory: "2048Mi"
+            memory: "2000Mi"
             cpu: "500m"
           limits:
-            memory: "4096Mi"
+            memory: "3500Mi"
             cpu: "1000m"
         ports:
         - containerPort: 8080

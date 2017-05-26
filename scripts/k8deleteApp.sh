@@ -30,8 +30,7 @@ kubectl delete -f ./ase_queue/queue.yaml; kubectl delete -f ./ase_queue/queue_se
 
 ############################## timeseries
 
-#kubectl delete -f ./ase_timeseries/timeseries_service_admin.yaml
-kubectl delete -f ./ase_timeseries/timeseries.yaml; kubectl delete -f ./ase_timeseries/timeseries_service_db.yaml;
+kubectl delete -f ./ase_timeseries/timeseries.yaml; kubectl delete -f ./ase_timeseries/timeseries_service_db.yaml; kubectl delete -f ./ase_timeseries/timeseries_service_admin.yaml;
 
 
 
