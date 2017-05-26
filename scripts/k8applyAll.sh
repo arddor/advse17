@@ -52,8 +52,8 @@ kubectl apply -f ./ase_twitter/twitter.yaml;
 
 ##################### web
 
-kubectl apply -f ./ase_web/web.yaml;
-kubectl apply -f ./ase_web/web_service.yaml;
+#kubectl apply -f ./ase_web/web.yaml;
+#kubectl apply -f ./ase_web/web_service.yaml;
 
 
 
