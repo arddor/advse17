@@ -17,9 +17,19 @@ spec:
         - name: AUTOSCALE_NAME
           value: compute-deployment
         - name: AUTOSCALE_THRESHOLD
-          value: "1"          
+          value: "50"
         - name: AUTOSCALE_MAX
-          value: "5"
+          value: "31"
+        - name: AUTOSCALE_INTERVAL
+          value: "30"
+        - name: AUTOSCALE_INCREASE_LIMIT
+          value: "3"
+        - name: AUTOSCALE_DECREASE_LIMIT
+          value: "1"
+        - name: AUTOSCALE_STATS_INTERVAL
+          value: "10"
+        - name: AUTOSCALE_EVAL_INTERVALS
+          value: "10"
         - name: RABBITMQ_QUEUE
           value: tweet
         - name: RABBITMQ_HOST
