@@ -55,26 +55,60 @@ export default {
     Plotly,
     PulseLoader
   },
-  async created () {
+  created () {
+    let {id} = this.$route.params
     this.loadTerm()
 
-    var ws = new WebSocket('ws://127.0.0.1:5002/echo')
-    ws.onopen = evt => console.log(evt)
-    ws.onclose = evt => console.log('closed')
-    ws.onmessage = evt => console.log(evt)
+    this.ws = new window.WebSocket(`ws://127.0.0.1/ws/changes/${id}`)
+    this.ws.onopen = evt => console.log('opened websocket')
+    this.ws.onclose = evt => console.log('closed')
+    this.ws.onmessage = evt => {
+      let json = JSON.parse(evt.data)
+      if (json.id === id) {
+        this.sum += json.data.sentiment
+        this.length += 1
+        if (json.data.sentiment > 0.75) {
+          this.chart[0].x.push(new Date(json.data.timestamp))
+          this.chart[0].y.push(1)
+        } else if (json.data.sentiment > 0.5) {
+          this.chart[1].x.push(new Date(json.data.timestamp))
+          this.chart[1].y.push(0.5)
+        } else if (json.data.sentiment > 0.25) {
+          this.chart[2].x.push(new Date(json.data.timestamp))
+          this.chart[2].y.push(-0.5)
+        } else if (json.data.sentiment < 0.25) {
+          this.chart[3].x.push(new Date(json.data.timestamp))
+          this.chart[3].y.push(-1)
+        }
+      }
+    }
+  },
+  beforeDestroy () {
+    if (this.ws) {
+      this.ws.close()
+    }
   },
   data () {
     return {
       loading: false,
       selected: 3600, // seconds to show
-      average: 0,
+      sum: 0,
+      length: 0,
       term: null,
-      chart: null
+      chart: null,
+      ws: null
     }
   },
   watch: {
     selected (val) {
       this.loadTerm(val)
+    }
+  },
+  computed: {
+    average () {
+      return this.length === 0
+      ? 0
+      : this.sum / this.length
     }
   },
   methods: {
@@ -109,9 +143,9 @@ export default {
         this.term = data.term
         this.length = data.data.length
         this.chart = this.chartData(data.data)
-        this.average = data.data.length === 0
+        this.sum = data.data.length === 0
         ? 0
-        : data.data.reduce((total, num) => ({sentiment: total.sentiment + num.sentiment})).sentiment / data.data.length
+        : data.data.reduce((total, num) => ({sentiment: total.sentiment + num.sentiment})).sentiment
         // this.chartData(data.data)
       } catch (e) {
         console.log(e)

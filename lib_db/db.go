@@ -137,12 +137,15 @@ func OnChange(fn func(value map[string]*Term)) {
 	}
 }
 
-func OnAddSentiment(fn func(value Sentiment)) {
-	res, err := r.Table("items").Pluck("data").Changes().Map(func(doc r.Term) interface{} {
-		return doc.Field("new_val").Field("data").Nth(-1)
+func OnAddSentiment(fn func(value interface{})) {
+	res, err := r.Table("items").Pluck("data", "id").Changes().Map(func(doc r.Term) map[string]interface{} {
+		return map[string]interface{}{
+			"id":   doc.Field("new_val").Field("id"),
+			"data": doc.Field("new_val").Field("data").Nth(-1),
+		}
 	}).Run(session)
 
-	var value Sentiment
+	var value interface{}
 
 	if err != nil {
 		log.Fatalln(err)
