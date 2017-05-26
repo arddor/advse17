@@ -59,7 +59,8 @@ export default {
     let {id} = this.$route.params
     this.loadTerm()
 
-    this.ws = new window.WebSocket(`ws://127.0.0.1/ws/changes/${id}`)
+    let {port} = window.location
+    this.ws = new window.WebSocket(`ws://127.0.0.1:${port}/ws/changes/${id}`)
     this.ws.onopen = evt => console.log('opened websocket')
     this.ws.onclose = evt => console.log('closed')
     this.ws.onmessage = evt => {
