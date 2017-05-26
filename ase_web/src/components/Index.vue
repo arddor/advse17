@@ -1,5 +1,15 @@
 <template>
-  <section class="section">
+  <section class="hero is-medium" v-if="loading">
+    <div class="hero-body">
+      <div class="container">
+        <div class="column is-one-third is-offset-one-third has-text-centered">
+          <pulse-loader :loading="loading"></pulse-loader>
+          <h1 class="title">loading</h1>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section class="section" v-else>
     <div class="field has-addons">
       <p class="control is-expanded">
         <input class="input" type="text" placeholder="Term to track" v-model="term">
@@ -21,23 +31,29 @@
 
 <script>
 import axios from 'axios'
+import PulseLoader from 'vue-spinner/src/PulseLoader.vue'
 export default {
   name: 'Index',
+  components: {
+    PulseLoader
+  },
   data () {
     return {
+      loading: false,
       term: '',
       terms: []
     }
   },
-  async beforeRouteEnter (to, from, next) {
+  async created () {
+    this.loading = true
     try {
       let {data} = await axios.get('api/terms')
-      next(vm => {
-        vm.$data.terms = data
-      })
+      this.terms = data
     } catch (e) {
-      next()
+      // TODO: Show popup error message
+      console.log(e)
     }
+    this.loading = false
   },
   methods: {
     goToDetails (id) {
@@ -50,11 +66,19 @@ export default {
           this.terms.push(data)
           this.term = ''
         } catch (e) {
-          console.log(e)
-          // TODO: Show popup error message
+          this.$toast('This term does already exist', {
+            horizontalPosition: 'center',
+            verticalPosition: 'bottom',
+            transition: 'slide-up'
+          })
         }
+      } else {
+        this.$toast('Cant add an empty term', {
+          horizontalPosition: 'center',
+          verticalPosition: 'bottom',
+          transition: 'slide-up'
+        })
       }
-      // TODO: Show popup that term should not be empty
     }
   }
 }

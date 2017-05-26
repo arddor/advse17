@@ -2,9 +2,9 @@ apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   name: timeseries-deployment
-  labels:
-    app: timeseries
 spec:
+  # we're using a persistent disk
+  # it cannot scale beyond one replica
   replicas: 1
   template:
     metadata:
@@ -12,10 +12,32 @@ spec:
         app: timeseries
     spec:
       containers:
-      - name: rethinkdb
-        image: rethinkdb:2.3.5
+      - name: timeseries
+        image: eu.gcr.io/advse-167708/ase_timeseries
+        resources:
+          requests:
+            memory: "2000Mi"
+            cpu: "500m"
+          limits:
+            memory: "3500Mi"
+            cpu: "1000m"
         ports:
         - containerPort: 8080
           name: admin
         - containerPort: 28015
           name: db
+        volumeMounts:
+        - name: rethink-persistent-storage
+          mountPath: /data
+      volumes:
+      - name: rethink-persistent-storage
+        gcePersistentDisk:
+          pdName: rethink-disk
+          fsType: ext4
+
+
+# Creating the disk
+
+#gcloud compute disks create --size 200GB rethink-disk
+
+# https://cloud.google.com/compute/docs/disks/add-persistent-disk#formatting

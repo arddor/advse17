@@ -1,0 +1,24 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: tweets-deployment
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: tweets
+    spec:
+      containers:
+      - name: tweets
+        image: eu.gcr.io/advse-167708/ase_load_tweets
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 27017
+          name: db

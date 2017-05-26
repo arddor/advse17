@@ -1,0 +1,21 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: replay-deployment
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: replay
+    spec:
+      containers:
+      - name: replay
+        image: eu.gcr.io/advse-167708/ase_load_replay
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "50m"
+          limits:
+            memory: "128Mi"
+            cpu: "100m"

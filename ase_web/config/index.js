@@ -4,8 +4,8 @@ var path = require('path')
 module.exports = {
   build: {
     env: require('./prod.env'),
-    index: path.resolve(__dirname, '../dist/index.html'),
-    assetsRoot: path.resolve(__dirname, '../dist'),
+    index: path.resolve(__dirname, '../../ase_api/public/index.html'),
+    assetsRoot: path.resolve(__dirname, '../../ase_api/public'),
     assetsSubDirectory: 'static',
     assetsPublicPath: '/',
     productionSourceMap: true,
@@ -23,16 +23,20 @@ module.exports = {
   },
   dev: {
     env: require('./dev.env'),
-    port: 8080,
+    port: 3000,
     autoOpenBrowser: true,
     assetsSubDirectory: 'static',
     assetsPublicPath: '/',
     proxyTable: {
       '/api/**': {
-        target: 'http://127.0.0.1:5002',
+        target: 'http://127.0.0.1:8000',
         // secure: false,
         // changeOrigin: true,
-        pathRewrite: {'^/api': ''}
+        // pathRewrite: {'^/api': ''}
+      },
+      '/ws/**': {
+        target: 'ws://127.0.0.1:8000',
+        ws: true
       }
     },
     // CSS Sourcemaps off by default because relative paths are "buggy"

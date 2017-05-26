@@ -10,7 +10,7 @@ import (
 
 	hc "cirello.io/HumorChecker"
 
-	"github.com/arddor/advse17/ase_api/db" // I copied this to "C:\Users\B\go\src\ase_api" to work locally -> remove ir later
+	"github.com/arddor/advse17/lib_db"
 
 	"sync"
 
@@ -73,7 +73,7 @@ func computeSentiment(sentence string) float32 {
 func initDB() {
 	printLog("DB", "Starting ...")
 
-	db.Initialize("ase_timeseries:28015")
+	db.Initialize("timeseries-db:28015")
 
 	_terms, _ = db.GetTerms(false)
 	if _terms == nil {
@@ -102,6 +102,9 @@ func initDB() {
 			}
 			_mutex.Unlock()
 		})
+		printLog("DB", "Connection to DB lost")
+		time.Sleep(3000 * time.Millisecond)
+		initDB()
 	}()
 }
 
@@ -111,11 +114,11 @@ func processTweet(timestamp string, tweet string) bool {
 		if strings.Contains(strings.ToLower(tweet), strings.ToLower(term.Term)) {
 			_mutex.Unlock()
 			printLog("ProcessTweet", "Tweet contains "+term.Term)
-			fmt.Print("'" + timestamp + "' converted to: ")
+			//fmt.Print("'" + timestamp + "' converted to: ")
 			// layout := "2006-01-02T15:04:05.000Z" // Example
 			layout := "Mon Jan 02 15:04:05 +0000 2006"
 			t, err := time.Parse(layout, timestamp)
-			fmt.Print("'" + t.String() + "'\n")
+			//fmt.Print("'" + t.String() + "'\n")
 			if err != nil {
 				printLog("ProcessTweet", "Could not convert timestamp!")
 				return false
@@ -139,7 +142,7 @@ func startWorker() {
 	printLog("Worker", "Starting ...")
 	for {
 		var err error
-		conn, err = amqp.Dial("amqp://ase_queue:5672")
+		conn, err = amqp.Dial("amqp://queue:5672")
 		if err == nil {
 			break
 		} else {
@@ -165,6 +168,12 @@ func startWorker() {
 	)
 	failOnError(err, "Failed to declare a queue")
 
+	// Per consumer limit
+	// http://www.rabbitmq.com/consumer-prefetch.html
+	// prefetchCount, prefetchSize int, global bool
+	err = ch.Qos(10, 0, false);
+	failOnError(err, "Failed to set Qos")
+
 	msgs, err := ch.Consume(
 		q.Name, // queue
 		"",     // consumer
@@ -180,17 +189,20 @@ func startWorker() {
 
 	go func() {
 		for d := range msgs {
-			printLog("Worker", "Received a tweet: "+string(d.Body))
+			//printLog("Worker", "Received a tweet: "+string(d.Body))
 			if processTweet(d.MessageId, string(d.Body)) {
 				d.Ack(false)
 			} else {
 				d.Nack(false, true)
 			}
 		}
+		printLog("Worker", "Connection to queue lost")
+		close(forever)
 	}()
 
-	printLog("Worker", " Waiting for messages. To exit press CTRL+C")
+	printLog("Worker", "Connected to queue. To exit press CTRL+C")
 	<-forever
+
 }
 
 func main() {
@@ -198,6 +210,8 @@ func main() {
 
 	initDB()
 
-	startWorker()
+	for true {
+		startWorker()
+	}
 
 }

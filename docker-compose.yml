@@ -10,90 +10,73 @@ version: "3"
 
 services:
 
-  ase_api:
-    build: ase_api
-    container_name: ase_api
+  api:
+    build:
+      context: ./
+      dockerfile: ase_api_Dockerfile
+    container_name: api
     ports:
-      - "5002:8000"
-    volumes:
-      - ./ase_api:/go/src/ase_api
-    working_dir: /go/src/ase_api
+      - "8000:8000"
     links:
-      # register new terms
-      - ase_timeseries
-      # load generation
-      #- ase_queue
-    depends_on:
-      - ase_timeseries
+      - timeseries-db # register new terms
+      - queue # load generation
 
 
-  ase_compute:
-    build: ase_compute
-    container_name: ase_compute
-    ports:
-      - "5000:8080"
-    volumes:
-      - ./ase_compute:/go/src/ase_compute
-      # Make this more elegant
-      - ./ase_api:/go/src/ase_api
-    working_dir: /go/src/ase_compute
+  compute:
+    build:
+      context: ./
+      dockerfile: ase_compute_Dockerfile
+    container_name: compute
     links:
-      # fetch terms and update sentiment
-      - ase_timeseries
-      # fetch tweets to process
-      - ase_queue
-    depends_on:
-      - ase_timeseries
-      - ase_queue
+      - timeseries-db # fetch terms and update sentiment
+      - queue # fetch tweets to process
 
 
-  ase_queue:
+  replay:
+    build: ./ase_load_replay/
+    container_name: replay
+    links:
+      - tweets # to replay
+      - queue # add tweets
+
+
+  queue:
     # https://hub.docker.com/_/rabbitmq/
     image: rabbitmq:3.6.9-alpine
-    container_name: ase_queue
+    container_name: queue
     ports:
       - "5672:5672"
 
 
-  ase_timeseries:
+  timeseries-db:
     # https://hub.docker.com/_/rethinkdb/
     image: rethinkdb:2.3.5
-    container_name: ase_timeseries
+    container_name: timeseries-db
     ports:
       - "28015:28015"
-      - "5010:8080" # Admin interface
-    # volumes: # make sure this exists locally
-    #   - ./ase_timeseries/mongodb:/data/db
+      - "8080:8080" # Admin interface
 
 
-  ase_twitter:
-    build: ase_twitter
-    container_name: ase_twitter
+  tweets:
+    build: ./ase_load_tweets/
+    container_name: tweets
     ports:
-      - "5001:8080"
-    volumes:
-      - ./ase_twitter:/go/src/ase_twitter
-      # Make this more elegant
-      - ./ase_api:/go/src/ase_api
-    working_dir: /go/src/ase_twitter
+      - "27017:27017"
+
+
+  twitter:
+    build:
+      context: ./
+      dockerfile: ase_twitter_Dockerfile
+    container_name: twitter
     links:
-      # fetch terms
-      - ase_timeseries
-      # add tweets
-      - ase_queue
-    depends_on:
-      - ase_timeseries
-      - ase_queue
+      - timeseries-db # fetch terms
+      - queue # add tweets
 
 
-  ase_web:
-    build: ase_web
-    container_name: ase_web
-    ports:
-      - "5050:8080"
-    volumes:
-      - ./ase_web:/usr/src/app
-    working_dir: /usr/src/app
-    depends_on:
-      # API calls
-      - ase_timeseries
+#  web:
+#    build: ase_web
+#    ports:
+#      - "80:8080"
+#    links:
+#      - timeseries-db # API calls

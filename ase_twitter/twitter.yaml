@@ -2,8 +2,6 @@ apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   name: twitter-deployment
-  labels:
-    app: twitter
 spec:
   replicas: 1
   template:
@@ -12,5 +10,12 @@ spec:
         app: twitter
     spec:
       containers:
-      - name: ase_twitter
+      - name: twitter
         image: eu.gcr.io/advse-167708/ase_twitter
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "1024Mi"
+            cpu: "500m"

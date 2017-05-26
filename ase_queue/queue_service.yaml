@@ -5,8 +5,13 @@ metadata:
   labels:
     app: queue
 spec:
-  type: ClusterIP
+  type: LoadBalancer
   ports:
-    - port: 5672
+  - port: 5672
+    name: main-port
+    nodePort: 30672
+  - port: 15672
+    name: admin-port
+    nodePort: 30080
   selector:
     app: queue

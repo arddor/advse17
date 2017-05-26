@@ -2,8 +2,6 @@ apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   name: compute-deployment
-  labels:
-    app: compute
 spec:
   replicas: 1
   template:
@@ -12,5 +10,12 @@ spec:
         app: compute
     spec:
       containers:
-      - name: ase_compute
+      - name: compute
         image: eu.gcr.io/advse-167708/ase_compute
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "250m"
+          limits:
+            memory: "128Mi"
+            cpu: "500m"

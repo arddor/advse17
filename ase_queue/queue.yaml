@@ -2,8 +2,6 @@ apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   name: queue-deployment
-  labels:
-    app: queue
 spec:
   replicas: 1
   template:
@@ -13,7 +11,20 @@ spec:
     spec:
       containers:
       - name: rabbitmq
-        image: rabbitmq:3.6.9-alpine
+        image: rabbitmq:3-management
+        imagePullPolicy: Always
+        env:
+        - name: RABBITMQ_HIPE_COMPILE
+          value: "1"
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1024Mi"
+            cpu: "500m"
         ports:
         - containerPort: 5672
-          name: q
+          hostPort: 5672
+        - containerPort: 15672
+          hostPort: 15672
