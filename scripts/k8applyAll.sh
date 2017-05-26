@@ -59,7 +59,7 @@ kubectl apply -f ./ase_twitter/twitter.yaml;
 
 ##################### replay
 
-kubectl apply -f ./ase_load_replay/replay.yaml;
+#kubectl apply -f ./ase_load_replay/replay.yaml;
 
 
 
