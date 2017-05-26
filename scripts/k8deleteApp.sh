@@ -50,17 +50,9 @@ kubectl delete -f ./ase_twitter/twitter.yaml;
 
 
 
-##################### web
-
-kubectl delete -f ./ase_web/web.yaml;
-kubectl delete -f ./ase_web/web_service.yaml;
-
-
-
 ##################### tweets
 
 kubectl delete -f ./ase_load_tweets/tweets.yaml;
 kubectl delete -f ./ase_load_tweets/tweets_service.yaml;
-
 
 

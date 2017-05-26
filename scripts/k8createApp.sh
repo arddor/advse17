@@ -50,13 +50,6 @@ kubectl create --save-config -f ./ase_twitter/twitter.yaml;
 
 
 
-##################### web
-
-#kubectl create --save-config -f ./ase_web/web.yaml;
-#kubectl create --save-config -f ./ase_web/web_service.yaml;
-
-
-
 ##################### tweets
 
 kubectl create --save-config -f ./ase_load_tweets/tweets.yaml;
