@@ -168,6 +168,12 @@ func startWorker() {
 	)
 	failOnError(err, "Failed to declare a queue")
 
+	// Per consumer limit
+	// http://www.rabbitmq.com/consumer-prefetch.html
+	// prefetchCount, prefetchSize int, global bool
+	err = ch.Qos(10, 0, false);
+	failOnError(err, "Failed to set Qos")
+
 	msgs, err := ch.Consume(
 		q.Name, // queue
 		"",     // consumer
