@@ -33,3 +33,4 @@ ase_timeseries/mongodb/*
 /load_mine_tweets/node_modules/
 /todo.md
 /ase_load_tweets/mongodb
+/Documentation/API Calls.paw

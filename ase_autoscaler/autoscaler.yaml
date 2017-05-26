@@ -1,0 +1,39 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: autoscaler-deployment
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: autoscaler
+    spec:
+      containers:
+      - name: autoscale
+        image: mbogus/kube-amqp-autoscale
+        imagePullPolicy: Always
+        env:
+        - name: AUTOSCALE_NAME
+          value: compute-deployment
+        - name: AUTOSCALE_THRESHOLD
+          value: "1"
+        - name: AUTOSCALE_MAX
+          value: "5"
+        - name: RABBITMQ_QUEUE
+          value: tweet
+        - name: RABBITMQ_HOST
+          value: queue
+        - name: KUBERNETES_SERVICE_URL
+          value: https://35.187.177.145:443
+        # - name: KUBERNETES_SERVICE_USERNAME
+        #   value: admin
+        # - name: KUBERNETES_SERVICE_PASSWORD
+        #   value: kwJhKmfKugxTl3Pf
+        resources:
+          requests:
+            cpu: 100m
+            memory: 100Mi
+          limits:
+            cpu: 200m
+            memory: 200Mi

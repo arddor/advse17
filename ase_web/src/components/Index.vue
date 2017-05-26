@@ -66,11 +66,19 @@ export default {
           this.terms.push(data)
           this.term = ''
         } catch (e) {
-          console.log(e)
-          // TODO: Show popup error message
+          this.$toast('This term does already exist', {
+            horizontalPosition: 'center',
+            verticalPosition: 'bottom',
+            transition: 'slide-up'
+          })
         }
+      } else {
+        this.$toast('Cant add an empty term', {
+          horizontalPosition: 'center',
+          verticalPosition: 'bottom',
+          transition: 'slide-up'
+        })
       }
-      // TODO: Show popup that term should not be empty
     }
   }
 }

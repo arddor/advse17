@@ -33,6 +33,10 @@ module.exports = {
         // secure: false,
         // changeOrigin: true,
         // pathRewrite: {'^/api': ''}
+      },
+      '/ws/**': {
+        target: 'ws://127.0.0.1:8000',
+        ws: true
       }
     },
     // CSS Sourcemaps off by default because relative paths are "buggy"

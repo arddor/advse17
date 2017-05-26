@@ -17,10 +17,9 @@ kubectl delete -f ./ase_api/api_service.yaml;
 
 
 
-##################### tweets
+##################### compute
 
-kubectl delete -f ./ase_load_tweets/tweets.yaml;
-kubectl delete -f ./ase_load_tweets/tweets_service.yaml;
+kubectl delete -f ./ase_compute/compute.yaml;
 
 
 
@@ -34,8 +33,14 @@ kubectl delete -f ./ase_queue/queue_service.yaml;
 ############################## timeseries
 
 kubectl delete -f ./ase_timeseries/timeseries.yaml
-kubectl delete -f ./ase_timeseries/timeseries_service_admin.yaml
+#kubectl delete -f ./ase_timeseries/timeseries_service_admin.yaml
 kubectl delete -f ./ase_timeseries/timeseries_service_db.yaml
+
+
+
+############################## autoscaler
+
+kubectl delete -f ./ase_autoscaler/autoscaler.yaml
 
 
 
@@ -45,10 +50,9 @@ kubectl delete -f ./ase_twitter/twitter.yaml;
 
 
 
-##################### web
+##################### tweets
 
-kubectl delete -f ./ase_web/web.yaml;
-kubectl delete -f ./ase_web/web_service.yaml;
-
+kubectl delete -f ./ase_load_tweets/tweets.yaml;
+kubectl delete -f ./ase_load_tweets/tweets_service.yaml;
 
 
