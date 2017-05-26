@@ -17,7 +17,7 @@ spec:
         - name: AUTOSCALE_NAME
           value: compute-deployment
         - name: AUTOSCALE_THRESHOLD
-          value: "1"
+          value: "1"          
         - name: AUTOSCALE_MAX
           value: "5"
         - name: RABBITMQ_QUEUE
@@ -25,15 +25,11 @@ spec:
         - name: RABBITMQ_HOST
           value: queue
         - name: KUBERNETES_SERVICE_URL
-          value: https://35.187.177.145:443
-        # - name: KUBERNETES_SERVICE_USERNAME
-        #   value: admin
-        # - name: KUBERNETES_SERVICE_PASSWORD
-        #   value: kwJhKmfKugxTl3Pf
+          value: "https://kubernetes:443"
         resources:
           requests:
-            cpu: 100m
-            memory: 100Mi
+            memory: "64Mi"
+            cpu: "100m"
           limits:
-            cpu: 200m
-            memory: 200Mi
+            memory: "128Mi"
+            cpu: "250m"
