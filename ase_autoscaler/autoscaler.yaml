@@ -22,7 +22,7 @@ spec:
           value: "5"
         - name: RABBITMQ_QUEUE
           value: tweet
-        - name: KUBERNETES_RABBITMQ_SERVICE_NAME
+        - name: RABBITMQ_HOST
           value: queue
         resources:
           requests:
