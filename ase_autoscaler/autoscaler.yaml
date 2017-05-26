@@ -28,8 +28,8 @@ spec:
           value: "https://kubernetes:443"
         resources:
           requests:
-            cpu: 100m
-            memory: 100Mi
+            memory: "64Mi"
+            cpu: "100m"
           limits:
-            cpu: 200m
-            memory: 200Mi
+            memory: "128Mi"
+            cpu: "250m"
