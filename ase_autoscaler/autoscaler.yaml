@@ -24,6 +24,12 @@ spec:
           value: tweet
         - name: RABBITMQ_HOST
           value: queue
+        - name: KUBERNETES_SERVICE_URL
+          value: https://35.187.177.145:443
+        # - name: KUBERNETES_SERVICE_USERNAME
+        #   value: admin
+        # - name: KUBERNETES_SERVICE_PASSWORD
+        #   value: kwJhKmfKugxTl3Pf
         resources:
           requests:
             cpu: 100m
