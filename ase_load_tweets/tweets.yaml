@@ -14,10 +14,10 @@ spec:
         image: eu.gcr.io/advse-167708/ase_load_tweets
         resources:
           requests:
-            memory: "512Mi"
+            memory: "256Mi"
             cpu: "250m"
           limits:
-            memory: "1024Mi"
+            memory: "512Mi"
             cpu: "500m"
         ports:
         - containerPort: 27017
