@@ -187,10 +187,13 @@ func startWorker() {
 				d.Nack(false, true)
 			}
 		}
+		printLog("Worker", "Connection to queue lost")
+		close(forever)
 	}()
 
-	printLog("Worker", " Waiting for messages. To exit press CTRL+C")
+	printLog("Worker", "Connected to queue. To exit press CTRL+C")
 	<-forever
+
 }
 
 func main() {
@@ -198,6 +201,8 @@ func main() {
 
 	initDB()
 
-	startWorker()
+	for true {
+		startWorker()
+	}
 
 }
