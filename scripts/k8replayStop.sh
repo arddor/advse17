@@ -12,13 +12,6 @@
 
 ##################### replay
 
-kubectl create -f ./ase_load_replay/replay.yaml;
-
-
-
-##################### tweets
-
-kubectl create -f ./ase_load_tweets/tweets.yaml;
-kubectl create -f ./ase_load_tweets/tweets_service.yaml;
+kubectl delete -f ./ase_load_replay/replay.yaml;
 
 

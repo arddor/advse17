@@ -12,13 +12,6 @@
 
 ##################### replay
 
-kubectl delete -f ./ase_load_replay/replay.yaml;
-
-
-
-##################### tweets
-
-kubectl delete -f ./ase_load_tweets/tweets.yaml;
-kubectl delete -f ./ase_load_tweets/tweets_service.yaml;
+kubectl create --save-config -f ./ase_load_replay/replay.yaml;
 
 

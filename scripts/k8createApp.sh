@@ -12,42 +12,47 @@
 
 ############################## api
 
-kubectl create -f ./ase_api/api.yaml;
-kubectl create -f ./ase_api/api_service.yaml;
+kubectl create --save-config -f ./ase_api/api.yaml;
+kubectl create --save-config -f ./ase_api/api_service.yaml;
 
 
 
 ##################### compute
 
-kubectl create -f ./ase_compute/compute.yaml;
+kubectl create --save-config -f ./ase_compute/compute.yaml;
 
 
 
 ##################### queue
 
-kubectl create -f ./ase_queue/queue.yaml;
-kubectl create -f ./ase_queue/queue_service.yaml;
+kubectl create --save-config -f ./ase_queue/queue.yaml;
+kubectl create --save-config -f ./ase_queue/queue_service.yaml;
 
 
 
 ############################## timeseries
 
-kubectl create -f ./ase_timeseries/timeseries.yaml
-kubectl create -f ./ase_timeseries/timeseries_service_admin.yaml
-kubectl create -f ./ase_timeseries/timeseries_service_db.yaml
+kubectl create --save-config -f ./ase_timeseries/timeseries.yaml
+kubectl create --save-config -f ./ase_timeseries/timeseries_service_admin.yaml
+kubectl create --save-config -f ./ase_timeseries/timeseries_service_db.yaml
+
+
+
+############################## autoscaler
+
+kubectl create --save-config -f ./ase_autoscaler/autoscaler.yaml
 
 
 
 ##################### twitter
 
-kubectl create -f ./ase_twitter/twitter.yaml;
+kubectl create --save-config -f ./ase_twitter/twitter.yaml;
 
 
 
-##################### web
+##################### tweets
 
-kubectl create -f ./ase_web/web.yaml;
-kubectl create -f ./ase_web/web_service.yaml;
-
+kubectl create --save-config -f ./ase_load_tweets/tweets.yaml;
+kubectl create --save-config -f ./ase_load_tweets/tweets_service.yaml;
 
 

@@ -23,19 +23,6 @@ kubectl apply -f ./ase_compute/compute.yaml;
 
 
 
-##################### replay
-
-kubectl apply -f ./ase_load_replay/replay.yaml;
-
-
-
-##################### tweets
-
-kubectl apply -f ./ase_load_tweets/tweets.yaml;
-kubectl apply -f ./ase_load_tweets/tweets_service.yaml;
-
-
-
 ##################### queue
 
 kubectl apply -f ./ase_queue/queue.yaml;
@@ -51,6 +38,12 @@ kubectl apply -f ./ase_timeseries/timeseries_service_db.yaml
 
 
 
+############################## autoscaler
+
+kubectl apply -f ./ase_autoscaler/autoscaler.yaml
+
+
+
 ##################### twitter
 
 kubectl apply -f ./ase_twitter/twitter.yaml;
@@ -61,6 +54,19 @@ kubectl apply -f ./ase_twitter/twitter.yaml;
 
 kubectl apply -f ./ase_web/web.yaml;
 kubectl apply -f ./ase_web/web_service.yaml;
+
+
+
+##################### replay
+
+kubectl apply -f ./ase_load_replay/replay.yaml;
+
+
+
+##################### tweets
+
+kubectl apply -f ./ase_load_tweets/tweets.yaml;
+kubectl apply -f ./ase_load_tweets/tweets_service.yaml;
 
 
 
