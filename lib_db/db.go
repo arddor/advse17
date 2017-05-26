@@ -5,6 +5,7 @@ package db
 import (
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	r "gopkg.in/gorethink/gorethink.v3"
@@ -101,11 +102,19 @@ func CreateTerm(term string) (*Term, error) {
 		Data:    []Sentiment{},
 		Created: time.Now(),
 	}
-	fmt.Println(obj)
-	res, err := r.Table("items").Insert(obj).RunWrite(session)
+
+	res, err := r.Table("items").Filter(func(doc r.Term) r.Term {
+		return doc.Field("term").Downcase().Eq(strings.ToLower(term))
+	}).Count().Do(func(result r.Term) r.Term {
+		return r.Branch(
+			result.Eq(0),
+			r.Table("items").Insert(obj),
+			"exists",
+		)
+	}).RunWrite(session)
 	if err != nil {
 		fmt.Println("Some error ...")
-		log.Fatal(err)
+		// log.Fatal(err)
 		return nil, err
 	}
 

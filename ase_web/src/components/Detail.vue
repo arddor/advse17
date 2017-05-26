@@ -149,7 +149,11 @@ export default {
         : data.data.reduce((total, num) => ({sentiment: total.sentiment + num.sentiment})).sentiment
         // this.chartData(data.data)
       } catch (e) {
-        console.log(e)
+        this.$toast('Could not load data. Try to refresh the page', {
+          horizontalPosition: 'center',
+          verticalPosition: 'bottom',
+          transition: 'slide-up'
+        })
       }
       this.loading = false
     }
