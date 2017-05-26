@@ -66,7 +66,7 @@ export default {
     this.ws.onclose = evt => console.log('closed')
     this.ws.onmessage = evt => {
       let json = JSON.parse(evt.data)
-      if (json.id === id) {
+      if (json.id === id && this.chart !== null) {
         this.sum += json.data.sentiment
         this.length += 1
         if (json.data.sentiment > 0.75) {
